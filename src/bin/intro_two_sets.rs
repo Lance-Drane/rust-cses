@@ -120,14 +120,22 @@ fn main() {
 mod test {
     use super::*;
 
+    fn test(input: &[u8], target: &[u8]) {
+        let mut scan = UnsafeScanner::new(input);
+        let mut out = Vec::with_capacity(target.len());
+        solve(&mut scan, &mut out);
+
+        assert_eq!(out, target);
+    }
+
     // NOTE: valid tests can technically print out _any_ solution, but we have a specific implementation.
 
     #[test]
     fn test_example() {
-        let input: &[u8] = b"\
+        let input = b"\
 7
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 YES
 4
 4 7 1 2
@@ -135,19 +143,15 @@ YES
 5 6 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_longer() {
-        let input: &[u8] = b"\
+        let input = b"\
 11
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 YES
 6
 4 5 10 11 1 2
@@ -155,19 +159,15 @@ YES
 6 7 8 9 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_mod_3() {
-        let input: &[u8] = b"\
+        let input = b"\
 3
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 YES
 2
 1 2
@@ -175,19 +175,15 @@ YES
 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_mod_0() {
-        let input: &[u8] = b"\
+        let input = b"\
 4
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 YES
 2
 1 4
@@ -195,19 +191,15 @@ YES
 2 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_mod_0_longer() {
-        let input: &[u8] = b"\
+        let input = b"\
 12
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 YES
 6
 1 2 3 10 11 12
@@ -215,26 +207,18 @@ YES
 4 5 6 7 8 9
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_example_2() {
-        let input: &[u8] = b"\
+        let input = b"\
 6
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 NO
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

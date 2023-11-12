@@ -89,48 +89,48 @@ fn main() {
 mod test {
     use super::*;
 
+    fn test(input: &[u8], target: &[u8]) {
+        let mut scan = UnsafeScanner::new(input);
+        let mut out = Vec::with_capacity(target.len());
+        solve(&mut scan, &mut out);
+
+        assert_eq!(out, target);
+    }
+
     #[test]
     fn test_example() {
-        let input: &[u8] = b"\
+        let input = b"\
 2
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 3
 1 2
 1 3
 2 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_example_short() {
-        let input: &[u8] = b"\
+        let input = b"\
 1
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 1
 1 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_example_odd() {
-        let input: &[u8] = b"\
+        let input = b"\
 3
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 7
 1 3
 1 2
@@ -141,19 +141,15 @@ mod test {
 1 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_example_even() {
-        let input: &[u8] = b"\
+        let input = b"\
 4
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 15
 1 2
 1 3
@@ -172,19 +168,15 @@ mod test {
 2 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_example_five() {
-        let input: &[u8] = b"\
+        let input = b"\
 5
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 31
 1 3
 1 2
@@ -219,10 +211,6 @@ mod test {
 1 3
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

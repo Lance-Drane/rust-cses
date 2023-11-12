@@ -79,83 +79,71 @@ fn main() {
 mod test {
     use super::*;
 
-    #[test]
-    fn test_example() {
-        let input: &[u8] = b"\
-20
-";
-        let target: &[u8] = b"\
-4
-";
-
+    fn test(input: &[u8], target: &[u8]) {
         let mut scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
         solve(&mut scan, &mut out);
 
         assert_eq!(out, target);
+    }
+
+    #[test]
+    fn test_example() {
+        let input = b"\
+20
+";
+        let target = b"\
+4
+";
+
+        test(input, target);
     }
 
     #[test]
     fn test_large() {
-        let input: &[u8] = b"\
+        let input = b"\
 100
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 24
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_small() {
-        let input: &[u8] = b"\
+        let input = b"\
 4
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 0
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_largest() {
-        let input: &[u8] = b"\
+        let input = b"\
 1000000000
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 249999998
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_power_of_5() {
-        let input: &[u8] = b"\
+        let input = b"\
 625
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 156
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

@@ -85,71 +85,63 @@ fn main() {
 mod test {
     use super::*;
 
-    #[test]
-    fn test_example() {
-        let input: &[u8] = b"\
-8
--1 3 -2 5 3 -5 2 2
-";
-        let target: &[u8] = b"\
-9
-";
-
+    fn test(input: &[u8], target: &[u8]) {
         let mut scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
         solve(&mut scan, &mut out);
 
         assert_eq!(out, target);
+    }
+
+    #[test]
+    fn test_example() {
+        let input = b"\
+8
+-1 3 -2 5 3 -5 2 2
+";
+        let target = b"\
+9
+";
+
+        test(input, target);
     }
 
     #[test]
     fn test_one_negative() {
-        let input: &[u8] = b"\
+        let input = b"\
 1
 -2
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 -2
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_many_negative() {
-        let input: &[u8] = b"\
+        let input = b"\
 5
 -1 -1 -1 -1 -2
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 -1
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_unusual() {
-        let input: &[u8] = b"\
+        let input = b"\
 10
 24 7 -27 17 -67 65 -23 58 85 -39
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 185
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

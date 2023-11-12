@@ -104,71 +104,63 @@ fn main() {
 mod test {
     use super::*;
 
+    fn test(input: &[u8], target: &[u8]) {
+        let mut scan = UnsafeScanner::new(input);
+        let mut out = Vec::with_capacity(target.len());
+        solve(&mut scan, &mut out);
+
+        assert_eq!(out, target);
+    }
+
     // NOTE: while CSES allows for any valid solution, we have a specific implementation.
     // Characters which come first in the alphabet come in at the beginning and end of the string
     // Characters at the end of the alphabet come in at the middle of the string
 
     #[test]
     fn test_example() {
-        let input: &[u8] = b"\
+        let input = b"\
 AAAACACBA
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 AAACBCAAA
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_invalid() {
-        let input: &[u8] = b"\
+        let input = b"\
 NOIX
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 NO SOLUTION
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_no_middle() {
-        let input: &[u8] = b"\
+        let input = b"\
 REDRED
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 DERRED
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_long_middle() {
-        let input: &[u8] = b"\
+        let input = b"\
 AADDDCC
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 ACDDDCA
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

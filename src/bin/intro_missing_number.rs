@@ -77,20 +77,24 @@ fn main() {
 mod test {
     use super::*;
 
-    #[test]
-    fn test_example() {
-        let input: &[u8] = b"\
-5
-2 3 1 5
-";
-        let target: &[u8] = b"\
-4
-";
-
+    fn test(input: &[u8], target: &[u8]) {
         let mut scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
         solve(&mut scan, &mut out);
 
         assert_eq!(out, target);
+    }
+
+    #[test]
+    fn test_example() {
+        let input = b"\
+5
+2 3 1 5
+";
+        let target = b"\
+4
+";
+
+        test(input, target);
     }
 }

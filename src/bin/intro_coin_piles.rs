@@ -86,20 +86,7 @@ fn main() {
 mod test {
     use super::*;
 
-    #[test]
-    fn test_example() {
-        let input: &[u8] = b"\
-3
-2 1
-2 2
-3 3
-";
-        let target: &[u8] = b"\
-YES
-NO
-YES
-";
-
+    fn test(input: &[u8], target: &[u8]) {
         let mut scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
         solve(&mut scan, &mut out);
@@ -108,8 +95,25 @@ YES
     }
 
     #[test]
+    fn test_example() {
+        let input = b"\
+3
+2 1
+2 2
+3 3
+";
+        let target = b"\
+YES
+NO
+YES
+";
+
+        test(input, target);
+    }
+
+    #[test]
     fn test_example_2() {
-        let input: &[u8] = b"\
+        let input = b"\
 9
 0 0
 0 1
@@ -121,7 +125,7 @@ YES
 753728522 940667932
 11 4
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 YES
 NO
 NO
@@ -133,10 +137,6 @@ YES
 NO
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

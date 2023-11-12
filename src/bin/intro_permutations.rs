@@ -83,54 +83,50 @@ fn main() {
 mod test {
     use super::*;
 
+    fn test(input: &[u8], target: &[u8]) {
+        let mut scan = UnsafeScanner::new(input);
+        let mut out = Vec::with_capacity(target.len());
+        solve(&mut scan, &mut out);
+
+        assert_eq!(out, target);
+    }
+
     // NOTE: valid tests can technically print out _any_ permutation, but we have a specific implementation.
     // NOTE: All "targets" have a space at the end, as this is fine for CSES and allows for more concise logic.
 
     #[test]
     fn test_1() {
-        let input: &[u8] = b"\
+        let input = b"\
 1
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 1 
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_example() {
-        let input: &[u8] = b"\
+        let input = b"\
 5
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 2 4 1 3 5 
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_no_solution() {
-        let input: &[u8] = b"\
+        let input = b"\
 3
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 NO SOLUTION
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

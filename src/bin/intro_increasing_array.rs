@@ -92,71 +92,63 @@ fn main() {
 mod test {
     use super::*;
 
-    #[test]
-    fn test_example() {
-        let input: &[u8] = b"\
-5
-3 2 5 1 7
-";
-        let target: &[u8] = b"\
-5
-";
-
+    fn test(input: &[u8], target: &[u8]) {
         let mut scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
         solve(&mut scan, &mut out);
 
         assert_eq!(out, target);
+    }
+
+    #[test]
+    fn test_example() {
+        let input = b"\
+5
+3 2 5 1 7
+";
+        let target = b"\
+5
+";
+
+        test(input, target);
     }
 
     #[test]
     fn test_no_step() {
-        let input: &[u8] = b"\
+        let input = b"\
 10
 1 1 1 1 1 1 1 1 1 1
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 0
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_one_item() {
-        let input: &[u8] = b"\
+        let input = b"\
 1
 329873232
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 0
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_many_steps() {
-        let input: &[u8] = b"\
+        let input = b"\
 10
 1000000000 1 1 1 1 1 1 1 1 1
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 8999999991
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

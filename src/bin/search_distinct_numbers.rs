@@ -143,54 +143,50 @@ fn main() {
 mod test {
     use super::*;
 
-    #[test]
-    fn test_example() {
-        let input: &[u8] = b"\
-5
-2 3 2 2 3
-";
-        let target: &[u8] = b"\
-2
-";
-
+    fn test(input: &[u8], target: &[u8]) {
         let mut scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
         solve(&mut scan, &mut out);
 
         assert_eq!(out, target);
+    }
+
+    #[test]
+    fn test_example() {
+        let input = b"\
+5
+2 3 2 2 3
+";
+        let target = b"\
+2
+";
+
+        test(input, target);
     }
 
     #[test]
     fn test_all_unique() {
-        let input: &[u8] = b"\
+        let input = b"\
 4
 3 2 1 1000000000
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 4
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 
     #[test]
     fn test_all_same() {
-        let input: &[u8] = b"\
+        let input = b"\
 6
 6 6 6 6 6 6
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 1
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }

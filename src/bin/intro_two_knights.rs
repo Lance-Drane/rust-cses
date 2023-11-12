@@ -90,12 +90,20 @@ fn main() {
 mod test {
     use super::*;
 
+    fn test(input: &[u8], target: &[u8]) {
+        let mut scan = UnsafeScanner::new(input);
+        let mut out = Vec::with_capacity(target.len());
+        solve(&mut scan, &mut out);
+
+        assert_eq!(out, target);
+    }
+
     #[test]
     fn test_example() {
-        let input: &[u8] = b"\
+        let input = b"\
 8
 ";
-        let target: &[u8] = b"\
+        let target = b"\
 0
 6
 28
@@ -106,10 +114,6 @@ mod test {
 1848
 ";
 
-        let mut scan = UnsafeScanner::new(input);
-        let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
-
-        assert_eq!(out, target);
+        test(input, target);
     }
 }
