@@ -1,0 +1,16 @@
+[package]
+name = "rust-cses"
+version = "0.1.0"
+edition = "2021"
+
+description = "Solutions for the CSES (Code Submission Evaluation System) problem set"
+repository = "https://github.com/Lance-Drane/rust-cses"
+readme = "README.md"
+keywords = ["competitive", "programming", "cses"]
+categories = ["algorithms", "data-structures", "mathematics"]
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.8.5"

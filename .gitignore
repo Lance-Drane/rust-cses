@@ -1,0 +1,8 @@
+# random test files
+*.txt
+
+# random python scribblings, sometimes used for quickly generating test data
+__pycache__
+*.py
+
+/target
