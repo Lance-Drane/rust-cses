@@ -81,10 +81,10 @@ fn solve<R: std::io::BufRead, W: std::io::Write>(scan: &mut UnsafeScanner<R>, ou
 
     for idx in *coins.last().unwrap()..=target {
         cache[idx] = coins
-                .iter()
-                .skip_while(|coin| **coin > idx)
-                .map(|coin| cache[idx - coin])
-                .sum::<u64>()
+            .iter()
+            .skip_while(|coin| **coin > idx)
+            .map(|coin| cache[idx - coin])
+            .sum::<u64>()
             % MODULO;
     }
 
@@ -148,5 +148,5 @@ mod test {
 ";
 
         test(input, target);
-    }    
+    }
 }
