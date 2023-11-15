@@ -76,7 +76,7 @@ fn solve<R: std::io::BufRead, W: std::io::Write>(scan: &mut UnsafeScanner<R>, ou
     let target: usize = scan.token();
     let mut coins: Vec<usize> = (0..capacity).map(|_| scan.token::<usize>()).collect();
     coins.sort_unstable_by(|a, b| b.cmp(a));
-    let mut cache = [0_u64; 1_000_001];
+    let mut cache = vec![0_u64; target + 1];
     cache[0] = 1;
 
     for idx in *coins.last().unwrap()..=target {

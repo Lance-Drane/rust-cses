@@ -65,7 +65,7 @@ fn solve<R: std::io::BufRead, W: std::io::Write>(scan: &mut UnsafeScanner<R>, ou
     let capacity: u8 = scan.token();
     let target: usize = scan.token();
 
-    let mut cache = [MODULO; 1_000_001];
+    let mut cache = vec![MODULO; target + 1];
     cache[0] = 0;
 
     for coin in (0..capacity).map(|_| scan.token::<usize>()) {
