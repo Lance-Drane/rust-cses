@@ -1,18 +1,26 @@
 // I/O boilerplate //
 
-pub struct UnsafeScanner<R> {
-    reader: R,
+pub struct UnsafeScanner {
+    // not actually dead code, needed for buf_iter to work
+    #[allow(dead_code)]
     buf_str: Vec<u8>,
     buf_iter: std::str::SplitAsciiWhitespace<'static>,
 }
 
-impl<R: std::io::BufRead> UnsafeScanner<R> {
-    pub fn new(reader: R) -> Self {
-        Self {
-            reader,
-            buf_str: vec![],
-            buf_iter: "".split_ascii_whitespace(),
+impl UnsafeScanner {
+    pub fn new<R: std::io::BufRead>(mut reader: R) -> Self {
+        let mut buf_str = vec![];
+        unsafe {
+            reader.read_to_end(&mut buf_str).unwrap_unchecked();
         }
+        let buf_iter = unsafe {
+            let slice = std::str::from_utf8_unchecked(&buf_str);
+            std::mem::transmute(slice.split_ascii_whitespace())
+        };
+        // optional memory clear
+        buf_str.clear();
+
+        Self { buf_str, buf_iter }
     }
 
     /// Use "turbofish" syntax `token::<T>()` to select data type of next token.
@@ -20,18 +28,12 @@ impl<R: std::io::BufRead> UnsafeScanner<R> {
     /// # Panics
     /// Panics if there's an I/O error or if the token cannot be parsed as T.
     pub fn token<T: std::str::FromStr>(&mut self) -> T {
-        loop {
-            if let Some(token) = self.buf_iter.next() {
-                return token.parse().ok().expect("Failed parse");
-            }
-            self.buf_str.clear();
-            self.reader
-                .read_until(b'\n', &mut self.buf_str)
-                .expect("Failed read");
-            self.buf_iter = unsafe {
-                let slice = std::str::from_utf8_unchecked(&self.buf_str);
-                std::mem::transmute(slice.split_ascii_whitespace())
-            }
+        unsafe {
+            self.buf_iter
+                .next()
+                .unwrap_unchecked()
+                .parse()
+                .unwrap_unchecked()
         }
     }
 }
@@ -65,7 +67,7 @@ type Matrix = [[usize; 6]; 6];
 /// <ul>
 /// <li>1 ≤ n ≤ 10<sup>6</sup></li>
 /// </ul>
-fn solve<R: std::io::BufRead, W: std::io::Write>(scan: &mut UnsafeScanner<R>, out: &mut W) {
+fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut exponent = scan.token::<u32>();
 
     let mut base: Matrix = [
@@ -112,9 +114,9 @@ fn multiply_matrix(a: &Matrix, b: &Matrix) -> Matrix {
 // entrypoints //
 
 fn main() {
-    let mut scan = UnsafeScanner::new(std::io::stdin().lock());
+    let scan = UnsafeScanner::new(std::io::stdin().lock());
     let mut out = std::io::BufWriter::new(std::io::stdout().lock());
-    solve(&mut scan, &mut out);
+    solve(scan, &mut out);
 }
 
 #[cfg(test)]
@@ -122,9 +124,9 @@ mod test {
     use super::*;
 
     fn test(input: &[u8], target: &[u8]) {
-        let mut scan = UnsafeScanner::new(input);
+        let scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
-        solve(&mut scan, &mut out);
+        solve(scan, &mut out);
 
         assert_eq!(out, target);
     }
