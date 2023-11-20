@@ -1,14 +1,14 @@
 // I/O boilerplate //
 
-pub struct UnsafeScanner {
+pub struct UnsafeScanner<'a> {
     // not actually dead code, needed for buf_iter to work
     #[allow(dead_code)]
     buf_str: Vec<u8>,
-    buf_iter: std::str::SplitAsciiWhitespace<'static>,
+    buf_iter: std::str::SplitAsciiWhitespace<'a>,
 }
 
-impl UnsafeScanner {
-    pub fn new<R: std::io::BufRead>(mut reader: R) -> Self {
+impl UnsafeScanner<'_> {
+    pub fn new<R: std::io::Read>(mut reader: R) -> Self {
         let mut buf_str = vec![];
         unsafe {
             reader.read_to_end(&mut buf_str).unwrap_unchecked();
@@ -26,7 +26,7 @@ impl UnsafeScanner {
     /// Use "turbofish" syntax `token::<T>()` to select data type of next token.
     ///
     /// # Panics
-    /// Panics if there's an I/O error or if the token cannot be parsed as T.
+    /// Panics if there are no more tokens or if the token cannot be parsed as T.
     pub fn token<T: std::str::FromStr>(&mut self) -> T {
         unsafe {
             self.buf_iter
