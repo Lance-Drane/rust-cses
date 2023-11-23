@@ -159,5 +159,5 @@ mod test {
 ";
 
         test(input, target);
-    }    
+    }
 }
