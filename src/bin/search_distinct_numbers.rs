@@ -78,8 +78,6 @@ impl UnsafeScanner<'_> {
             let slice = std::str::from_utf8_unchecked(&buf_str);
             std::mem::transmute(slice.split_ascii_whitespace())
         };
-        // optional memory clear
-        buf_str.clear();
 
         Self { buf_str, buf_iter }
     }

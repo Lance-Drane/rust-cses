@@ -17,8 +17,6 @@ impl UnsafeScanner<'_> {
             let slice = std::str::from_utf8_unchecked(&buf_str);
             std::mem::transmute(slice.split_ascii_whitespace())
         };
-        // optional memory clear
-        buf_str.clear();
 
         Self { buf_str, buf_iter }
     }
@@ -72,7 +70,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
     let mut count = 0_u32;
 
-    let mut iter = children.iter();
+    let mut iter = children.into_iter();
     while let Some(thin) = iter.next() {
         loop {
             count += 1;
