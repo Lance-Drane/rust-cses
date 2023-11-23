@@ -50,7 +50,7 @@ impl UnsafeScanner<'_> {
 ///
 /// The first input line contains two integers n and x: the number of children and the maximum allowed weight.
 ///
-/// The next line contains n integers p1,p2,...,p_n: the weight of each child.
+/// The next line contains n integers p<sub>1</sub>, p<sub>2</sub>, ..., p<sub>n</sub>: the weight of each child.
 ///
 /// <b>Output</b>
 ///
