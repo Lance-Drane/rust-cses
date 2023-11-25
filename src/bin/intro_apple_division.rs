@@ -57,25 +57,25 @@ impl UnsafeScanner<'_> {
 /// <li>1 ≤ p<sub>i</sub> ≤ 10<sup>9</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let n: u8 = scan.token();
+    let n: usize = scan.token();
     let mut apples = [0_i64; 20];
-    for apple in &mut apples[..(n as usize)] {
+    for apple in &mut apples[..n] {
         *apple = scan.token();
     }
     apples.sort_unstable_by(|a, b| b.cmp(a));
 
     let mut weights = [0_i64; 20];
     let mut weight_sum = 0;
-    for (weight, apple) in weights[(20 - n as usize)..]
+    for (weight, apple) in weights[(20 - n)..]
         .iter_mut()
-        .zip(apples[..(n as usize)].iter().rev())
+        .zip(apples[..n].iter().rev())
     {
         weight_sum += apple;
         *weight = weight_sum;
     }
     weights.reverse();
 
-    writeln!(out, "{}", min_diff(0, &apples, &weights, 0, n as usize)).ok();
+    writeln!(out, "{}", min_diff(0, &apples, &weights, 0, n - 1)).ok();
 }
 
 fn min_diff(
@@ -86,7 +86,7 @@ fn min_diff(
     len: usize,
 ) -> i64 {
     unsafe {
-        if iter == len - 1 {
+        if iter == len {
             // base case, both subsets are filled after the final call
             return (last_subset_diff - apples.get_unchecked(iter)).abs();
         }
