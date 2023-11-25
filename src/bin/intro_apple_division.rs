@@ -59,7 +59,7 @@ impl UnsafeScanner<'_> {
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let n: u8 = scan.token();
     let mut apples = [0_i64; 20];
-    for apple in apples[..(n as usize)].iter_mut() {
+    for apple in &mut apples[..(n as usize)] {
         *apple = scan.token();
     }
     apples.sort_unstable_by(|a, b| b.cmp(a));
@@ -75,10 +75,16 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     }
     weights.reverse();
 
-    writeln!(out, "{}", min_diff(0, &apples, &weights, 0, &(n as usize))).ok();
+    writeln!(out, "{}", min_diff(0, &apples, &weights, 0, n as usize)).ok();
 }
 
-fn min_diff(iter: usize, apples: &[i64; 20], weights: &[i64; 20], last_subset_diff: i64, len: &usize) -> i64 {
+fn min_diff(
+    iter: usize,
+    apples: &[i64; 20],
+    weights: &[i64; 20],
+    last_subset_diff: i64,
+    len: usize,
+) -> i64 {
     unsafe {
         if iter == len - 1 {
             // base case, both subsets are filled after the final call
