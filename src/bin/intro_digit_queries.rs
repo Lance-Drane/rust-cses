@@ -101,7 +101,13 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         };
         let target_number = start_target + (query_position - start_position) / num_digits;
         let nth_digit = num_digits - (query_position - start_position) % num_digits - 1;
-        writeln!(out, "{}", (target_number / (10_usize.pow(nth_digit as u32))) % 10).ok();
+        #[allow(clippy::cast_possible_truncation)]
+        writeln!(
+            out,
+            "{}",
+            (target_number / (10_usize.pow(nth_digit as u32))) % 10
+        )
+        .ok();
     }
 }
 
