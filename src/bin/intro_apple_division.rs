@@ -66,10 +66,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
     let mut weights = [0_i64; 20];
     let mut weight_sum = 0;
-    for (weight, apple) in weights[(20 - n)..]
-        .iter_mut()
-        .zip(apples[..n].iter().rev())
-    {
+    for (weight, apple) in weights[(20 - n)..].iter_mut().zip(apples[..n].iter().rev()) {
         weight_sum += apple;
         *weight = weight_sum;
     }

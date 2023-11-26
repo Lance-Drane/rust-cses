@@ -99,12 +99,9 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
                 .map(|(idx, x)| (idx + 1, x))
                 .unwrap_unchecked()
         };
-        let mut target_number = start_target + (query_position - start_position) / num_digits;
+        let target_number = start_target + (query_position - start_position) / num_digits;
         let nth_digit = num_digits - (query_position - start_position) % num_digits - 1;
-        for _ in 0..nth_digit {
-            target_number /= 10;
-        }
-        writeln!(out, "{}", target_number % 10).ok();
+        writeln!(out, "{}", (target_number / (10_usize.pow(nth_digit as u32))) % 10).ok();
     }
 }
 
