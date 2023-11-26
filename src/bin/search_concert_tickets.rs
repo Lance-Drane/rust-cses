@@ -38,7 +38,7 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
-use std::collections::{BTreeSet, HashMap};
+use std::collections::BTreeMap;
 
 /// There are n concert tickets available, each with a certain price. Then, m customers arrive, one after another.
 ///
@@ -68,32 +68,28 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let n: u32 = scan.token();
     let m: u32 = scan.token();
 
-    let mut tickets: BTreeSet<u32> = BTreeSet::new();
-    let mut ticket_counter: HashMap<u32, u32> = HashMap::with_capacity(n as usize);
+    let mut ticket_counter: BTreeMap<u32, u32> = BTreeMap::new();
     for _ in 0..n {
-        let ticket = scan.token();
-        tickets.insert(ticket);
         ticket_counter
-            .entry(ticket)
+            .entry(scan.token())
             .and_modify(|e| *e += 1)
             .or_insert(1);
     }
 
     for customer in (0..m).map(|_| scan.token::<u32>()) {
-        if let Some(t) = tickets.range(..=customer).last() {
-            let ticket = *t;
-            writeln!(out, "{ticket}").ok();
-
-            unsafe {
-                let entry: &mut u32 = ticket_counter.get_mut(&ticket).unwrap_unchecked();
-                *entry -= 1;
-                if *entry == 0 {
-                    tickets.remove(&ticket);
+        match ticket_counter.range_mut(..=customer).next_back() {
+            Some((&ticket, count)) => {
+                writeln!(out, "{ticket}").ok();
+                if *count == 1 {
+                    ticket_counter.remove(&ticket);
+                } else {
+                    *count -= 1;
                 }
             }
-        } else {
-            out.write(b"-1\n").ok();
-        }
+            None => {
+                out.write(b"-1\n").ok();
+            }
+        };
     }
 }
 
