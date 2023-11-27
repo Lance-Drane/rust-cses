@@ -228,13 +228,6 @@ NO
 
     #[test]
     fn test_open_room() {
-        let result = "\
-..LLU
-.LLLU
-.U##U
-LU#AR
-LLLDD
-";
         let input = b"\
 5 5
 .....
