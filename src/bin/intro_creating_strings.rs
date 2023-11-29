@@ -98,7 +98,7 @@ fn next_permutation<T: std::cmp::Ord>(slice: &mut [T]) -> bool {
 // entrypoints //
 
 fn main() {
-    let scan = UnsafeScanner::new(std::io::stdin().lock());
+    let scan = UnsafeScanner::new(std::io::stdin());
     let mut out = std::io::BufWriter::new(std::io::stdout().lock());
     solve(scan, &mut out);
 }

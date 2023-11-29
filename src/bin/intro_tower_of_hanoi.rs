@@ -80,7 +80,7 @@ fn recurse<W: std::io::Write>(out: &mut W, from: u8, to: u8, swap: u8, disc: u8)
 // entrypoints //
 
 fn main() {
-    let scan = UnsafeScanner::new(std::io::stdin().lock());
+    let scan = UnsafeScanner::new(std::io::stdin());
     let mut out = std::io::BufWriter::new(std::io::stdout().lock());
     solve(scan, &mut out);
 }
