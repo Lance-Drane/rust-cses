@@ -124,7 +124,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         out,
         "{}",
         (0..n)
-            .map(|_| scan.token::<u64>())
+            .map(|_| scan.token::<u32>())
             .collect::<IntSet<_>>()
             .len()
     )
