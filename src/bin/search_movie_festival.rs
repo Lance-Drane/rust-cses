@@ -66,7 +66,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         })
         .collect();
 
-    movies.sort_unstable();
+    movies.sort_unstable_by_key(|m| m.0);
 
     writeln!(
         out,
