@@ -42,20 +42,26 @@ const MODULO: u64 = 1_000_000_007;
 
 type Matrix = [u64; 3];
 
-/// Given two numbers A and B, calculate their sum A+B.
+/// The Fibonacci numbers can be defined as follows:
+///
+/// - F<sub>0</sub>=0
+/// - F<sub>1</sub>=1
+/// - F<sub>n</sub> = F<sub<n-2</sub> + F<sub<n-1</sub>
+///
+/// Your task is to calculate the value of F<sub>n</sub> for a given n.
 ///
 /// <b>Input</b>
 ///
-/// The first line of input consists of two space-separated numbers, A and B. Note that the numbers might be negative.
+/// The only input line has an integer n.
 ///
 /// <b>Output</b>
 ///
-/// Output a single integer A+B.
+/// Print the value of F<sub>n</sub> modulo 10^9+7.
 ///
 /// <b>Constraints</b>
 ///
 /// <ul>
-/// <li>−10<sup>6</sup> ≤ A,B ≤ 10<sup>6</sup></li>
+/// <li>0 ≤ n ≤ 10<sup>18</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut n = scan.token::<u64>();
