@@ -72,12 +72,12 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         out,
         "{}",
         movies
-            .iter()
+            .into_iter()
             .fold((0, 0_u32), |(curr_end, count), (end, start)| {
-                if *start < curr_end {
+                if start < curr_end {
                     (curr_end, count)
                 } else {
-                    (*end, count + 1)
+                    (end, count + 1)
                 }
             })
             .1

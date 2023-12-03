@@ -71,7 +71,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         out,
         "{}",
         customers
-            .iter()
+            .into_iter()
             .fold((0, 0), |(best, current), shift| {
                 let next = current + shift.1;
                 (best.max(next), next)
