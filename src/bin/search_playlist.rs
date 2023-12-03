@@ -62,13 +62,12 @@ use std::collections::HashMap;
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let number: u32 = scan.token();
-    let songs: Vec<u32> = (0..number).map(|_| scan.token()).collect();
 
-    let mut visited = HashMap::with_capacity(number as usize);
+    let mut visited: HashMap<u32, u32> = HashMap::with_capacity(number as usize);
     let mut l_pointer = 0;
     let mut best = 0;
 
-    for (song, idx) in songs.iter().zip(1..) {
+    for (song, idx) in (0..number).map(|_| scan.token()).zip(1..) {
         if let Some(prev) = visited.insert(song, idx) {
             l_pointer = l_pointer.max(prev);
         }
