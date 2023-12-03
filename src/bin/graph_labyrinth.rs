@@ -158,8 +158,8 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
                 b'U' => end + width,
                 b'R' => end - 1,
                 b'D' => end - width,
-                b'L' => end + 1,
-                _ => unreachable!("The grid should have been modified with direction characters"),
+                // it's always going to be 'L' at this point
+                _ => end + 1,
             };
             letter = unsafe { *grid.get_unchecked(end) };
         }
