@@ -40,15 +40,11 @@ impl UnsafeScanner<'_> {
 
 const MODULO: u64 = 1_000_000_007;
 
-type Matrix = [u64; 3];
+type Matrix = [[u64; 6]; 6];
 
-/// The Fibonacci numbers can be defined as follows:
+/// Your task is to count the number of ways to construct sum n by throwing a dice one or more times. Each throw yields an integer between 1 \ldots 6.
 ///
-/// - F<sub>0</sub>=0
-/// - F<sub>1</sub>=1
-/// - F<sub>n</sub> = F<sub<n-2</sub> + F<sub<n-1</sub>
-///
-/// Your task is to calculate the value of F<sub>n</sub> for a given n.
+/// For example, if n=10, some possible ways are 3+3+4, 1+4+1+4 and 1+1+6+1+1.
 ///
 /// <b>Input</b>
 ///
@@ -56,40 +52,55 @@ type Matrix = [u64; 3];
 ///
 /// <b>Output</b>
 ///
-/// Print the value of F<sub>n</sub> modulo 10^9+7.
+/// Print the number of ways modulo 10<sup>9</sup> + 7.
 ///
 /// <b>Constraints</b>
 ///
 /// <ul>
-/// <li>0 ≤ n ≤ 10<sup>18</sup></li>
+/// <li>1 ≤ n ≤ 10<sup>18</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let mut n = scan.token::<u64>();
-    if n >= 2 {
-        n -= 1;
-        let mut base: Matrix = [1, 1, 0];
-        // identity matrix
-        let mut goal: Matrix = [1, 0, 1];
+    let mut exponent = scan.token::<u64>();
 
-        while n != 0 {
-            if n & 1 == 1 {
-                goal = multiply_matrix(&goal, &base);
-            }
-            base = multiply_matrix(&base, &base);
-            n >>= 1;
+    let mut base: Matrix = [
+        [1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0],
+    ];
+    // identity matrix
+    let mut goal: Matrix = [
+        [1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 1],
+    ];
+
+    while exponent != 0 {
+        if exponent & 1 == 1 {
+            goal = multiply_matrix(&goal, &base);
         }
-        writeln!(out, "{}", goal[0]).ok();
-    } else {
-        writeln!(out, "{n}").ok();
+        base = multiply_matrix(&base, &base);
+        exponent >>= 1;
     }
+
+    writeln!(out, "{}", goal[0][0]).ok();
 }
 
 fn multiply_matrix(a: &Matrix, b: &Matrix) -> Matrix {
-    [
-        (a[0] * b[0] + a[1] * b[1]) % MODULO,
-        (a[0] * b[1] + a[1] * b[2]) % MODULO,
-        (a[1] * b[1] + a[2] * b[2]) % MODULO,
-    ]
+    let mut ret: Matrix = [[0; 6]; 6];
+
+    for i in 0..6 {
+        for j in 0..6 {
+            ret[i][j] = ((0..6).map(|k| a[i][k] * b[k][j]).sum::<u64>()) % MODULO;
+        }
+    }
+
+    ret
 }
 
 // entrypoints //
@@ -115,46 +126,34 @@ mod test {
     #[test]
     fn test_example() {
         let input = b"\
+8
+";
+        let target = b"\
+125
+";
+
+        test(input, target);
+    }
+
+    #[test]
+    fn test_dp() {
+        let input = b"\
 10
 ";
         let target = b"\
-55
+492
 ";
 
         test(input, target);
     }
 
     #[test]
-    fn test_0() {
+    fn test_one_million() {
         let input = b"\
-0
+1000000
 ";
         let target = b"\
-0
-";
-
-        test(input, target);
-    }
-
-    #[test]
-    fn test_1() {
-        let input = b"\
-1
-";
-        let target = b"\
-1
-";
-
-        test(input, target);
-    }
-
-    #[test]
-    fn test_1000() {
-        let input = b"\
-1000
-";
-        let target = b"\
-517691607
+874273980
 ";
 
         test(input, target);
@@ -166,7 +165,7 @@ mod test {
 1000000000000000000
 ";
         let target = b"\
-209783453
+106021903
 ";
 
         test(input, target);
