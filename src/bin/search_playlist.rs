@@ -67,7 +67,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut l_pointer = 0;
     let mut best = 0;
 
-    for (song, idx) in (0..number).map(|_| scan.token()).zip(1..) {
+    for (song, idx) in (1..=number).map(|n| (scan.token(), n)) {
         if let Some(prev) = visited.insert(song, idx) {
             l_pointer = l_pointer.max(prev);
         }
