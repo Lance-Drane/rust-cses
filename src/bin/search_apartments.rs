@@ -74,12 +74,12 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut counter = 0;
     let mut apt_idx = apartments.len();
 
-    'applicant: for applicant in applicants.iter().rev() {
+    'applicant: for applicant in applicants.into_iter().rev() {
         let u_bound = applicant + k;
         let l_bound = applicant - k;
 
         while apt_idx > 0 {
-            let apartment = apartments[apt_idx - 1];
+            let apartment = unsafe { *apartments.get_unchecked(apt_idx - 1) };
             if apartment <= u_bound {
                 if apartment >= l_bound {
                     // Case 1: found valid apartment
