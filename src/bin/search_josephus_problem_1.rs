@@ -58,10 +58,10 @@ use std::collections::VecDeque;
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut circle: VecDeque<u32> = (1..=scan.token()).collect();
     while circle.len() > 1 {
-        circle.rotate_left(2);
-        write!(out, "{} ", circle.pop_back().unwrap()).ok();
+        circle.rotate_left(1);
+        write!(out, "{} ", circle.pop_front().unwrap()).ok();
     }
-    writeln!(out, "{}", circle.pop_back().unwrap()).ok();
+    writeln!(out, "{}", circle.pop_front().unwrap()).ok();
 }
 
 // entrypoints //
