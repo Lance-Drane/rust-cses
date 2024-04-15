@@ -69,11 +69,11 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 // supporting recursive function, just swap the positions around
 fn recurse<W: std::io::Write>(out: &mut W, from: u8, to: u8, swap: u8, disc: u8) {
     if disc == 1 {
-        out.write(&[from, b' ', to, b'\n']).ok();
+        out.write_all(&[from, b' ', to, b'\n']).ok();
         return;
     }
     recurse(out, from, swap, to, disc - 1);
-    out.write(&[from, b' ', to, b'\n']).ok();
+    out.write_all(&[from, b' ', to, b'\n']).ok();
     recurse(out, swap, to, from, disc - 1);
 }
 
