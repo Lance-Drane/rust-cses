@@ -71,7 +71,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         }
         lookups.insert(value, idx);
     }
-    out.write(b"IMPOSSIBLE\n").ok();
+    out.write_all(b"IMPOSSIBLE\n").ok();
 }
 
 // entrypoints //

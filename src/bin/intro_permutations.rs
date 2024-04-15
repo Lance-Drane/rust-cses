@@ -60,13 +60,13 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
     match num {
         2 | 3 => {
-            out.write(b"NO SOLUTION\n").ok();
+            out.write_all(b"NO SOLUTION\n").ok();
         }
         n => {
             (2..=n).step_by(2).chain((1..=n).step_by(2)).for_each(|i| {
                 write!(out, "{i} ").ok();
             });
-            out.write(b"\n").ok();
+            out.write_all(b"\n").ok();
         }
     };
 }

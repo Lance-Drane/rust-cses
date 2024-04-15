@@ -68,7 +68,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
             token * 3 + 1
         };
     }
-    out.write(b"1\n").ok();
+    out.write_all(b"1\n").ok();
 }
 
 // entrypoints //

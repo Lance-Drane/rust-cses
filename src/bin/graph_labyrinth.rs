@@ -148,7 +148,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     }
 
     if end == usize::MAX {
-        out.write(b"NO\n").ok();
+        out.write_all(b"NO\n").ok();
     } else {
         let mut letter = grid[end];
         let mut path = vec![];
@@ -165,8 +165,8 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         }
         path.reverse();
         write!(out, "YES\n{}\n", path.len()).ok();
-        out.write(&path).ok();
-        out.write(b"\n").ok();
+        out.write_all(&path).ok();
+        out.write_all(b"\n").ok();
     }
 }
 

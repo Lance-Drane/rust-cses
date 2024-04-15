@@ -75,7 +75,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     }
 
     if cache[target] == MODULO {
-        out.write(b"-1\n").ok();
+        out.write_all(b"-1\n").ok();
     } else {
         writeln!(out, "{}", cache[target]).ok();
     }

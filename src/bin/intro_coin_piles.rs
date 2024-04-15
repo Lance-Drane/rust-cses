@@ -65,7 +65,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         let a = scan.token::<u64>();
         let b = scan.token::<u64>();
 
-        out.write(if a << 1 < b || b << 1 < a || (a + b) % 3 != 0 {
+        out.write_all(if a << 1 < b || b << 1 < a || (a + b) % 3 != 0 {
             b"NO\n"
         } else {
             b"YES\n"
