@@ -73,13 +73,14 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
             }
         }
     }
-    
+
     for _ in 0..q {
         let left = scan.token::<usize>() - 1;
         let right = scan.token::<usize>();
         writeln!(out, "{}", unsafe {
             values.get_unchecked(right) - values.get_unchecked(left)
-        }).unwrap();
+        })
+        .unwrap();
     }
 }
 

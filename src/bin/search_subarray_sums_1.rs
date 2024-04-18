@@ -68,18 +68,18 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
     while r_pointer < arr.len() {
         if sum > target {
-            sum -= unsafe {arr.get_unchecked(l_pointer)};
+            sum -= unsafe { arr.get_unchecked(l_pointer) };
             l_pointer += 1;
         } else {
             if sum == target {
                 counter += 1;
             }
-            sum += unsafe {arr.get_unchecked(r_pointer)};
+            sum += unsafe { arr.get_unchecked(r_pointer) };
             r_pointer += 1;
         }
     }
     while sum > target {
-        sum -= unsafe {arr.get_unchecked(l_pointer)};
+        sum -= unsafe { arr.get_unchecked(l_pointer) };
         l_pointer += 1;
     }
     if sum == target {
@@ -133,5 +133,5 @@ mod test {
 ";
 
         test(input, target);
-    }    
+    }
 }
