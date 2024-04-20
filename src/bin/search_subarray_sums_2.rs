@@ -38,7 +38,9 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
-/// Given an array of n positive integers, your task is to count the number of subarrays having sum x.
+use std::collections::HashMap;
+
+/// Given an array of n integers, your task is to count the number of subarrays having sum x.
 ///
 /// <b>Input</b>
 ///
@@ -54,36 +56,22 @@ impl UnsafeScanner<'_> {
 ///
 /// <ul>
 /// <li>1 ≤ n, x ≤ 2 * 10<sup>5</sup></li>
-/// <li>1 ≤ x,a<sub>i</sub> ≤ 10<sup>9</sup></li>
+/// <li>-10<sup>9</sup> ≤ x,a<sub>i</sub> ≤ 10<sup>9</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let n: u32 = scan.token();
-    let target: u32 = scan.token();
-    let arr: Vec<u32> = (0..n).map(|_| scan.token()).collect();
+    let n: usize = scan.token();
+    let target: i64 = scan.token();
+    let mut counter = 0_u64;
+    let mut sum = 0_i64;
+    let mut map = HashMap::with_capacity(n);
+    map.insert(0, 1);
 
-    let mut counter = 0_u32;
-    let mut sum = 0;
-    let mut l_pointer = 0;
-    let mut r_pointer = 0;
-
-    while r_pointer < arr.len() {
-        if sum > target {
-            sum -= unsafe { arr.get_unchecked(l_pointer) };
-            l_pointer += 1;
-        } else {
-            if sum == target {
-                counter += 1;
-            }
-            sum += unsafe { arr.get_unchecked(r_pointer) };
-            r_pointer += 1;
+    for num in (0..n).map(|_| scan.token::<i64>()) {
+        sum += num;
+        if let Some(prev) = map.get(&(sum - target)) {
+            counter += prev;
         }
-    }
-    while sum > target {
-        sum -= unsafe { arr.get_unchecked(l_pointer) };
-        l_pointer += 1;
-    }
-    if sum == target {
-        counter += 1;
+        map.entry(sum).and_modify(|e| *e += 1).or_insert(1);
     }
 
     writeln!(out, "{counter}").unwrap();
@@ -113,10 +101,10 @@ mod test {
     fn test_example() {
         let input = b"\
 5 7
-2 4 1 2 7
+2 -1 3 5 -2
 ";
         let target = b"\
-3
+2
 ";
 
         test(input, target);
@@ -125,8 +113,8 @@ mod test {
     #[test]
     fn test_example_2() {
         let input = b"\
-5 9
-2 4 1 2 7
+5 3
+1 1 1 -1 1
 ";
         let target = b"\
 2
