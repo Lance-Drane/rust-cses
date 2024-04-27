@@ -38,11 +38,11 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
-/// Given an array of n positive integers, your task is to count the number of subarrays having sum x.
+/// Given an array of n integers, your task is to count the number of subarrays where the sum of values is divisible by n.
 ///
 /// <b>Input</b>
 ///
-/// The first input line has two integers n and x: the size of the array and the target sum x.
+/// The first input line has an integer n: the size of the array.
 ///
 /// The next line has n integers a<sub>1</sub>,a<sub>2</sub>,...,a<sub>n</sub>: the contents of the array.
 ///
@@ -54,36 +54,24 @@ impl UnsafeScanner<'_> {
 ///
 /// <ul>
 /// <li>1 ≤ n ≤ 2 * 10<sup>5</sup></li>
-/// <li>1 ≤ x,a<sub>i</sub> ≤ 10<sup>9</sup></li>
+/// <li>-10<sup>9</sup> ≤ x,a<sub>i</sub> ≤ 10<sup>9</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let n: u32 = scan.token();
-    let target: u32 = scan.token();
-    let arr: Vec<u32> = (0..n).map(|_| scan.token()).collect();
+    let n: i64 = scan.token();
+    let mut counter = 0_i64;
+    let mut sum = 0_i64;
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)] // ok given constraints
+    let mut mods = vec![0; n as usize];
+    mods[0] = 1;
 
-    let mut counter = 0_u32;
-    let mut sum = 0;
-    let mut l_pointer = 0;
-    let mut r_pointer = 0;
-
-    while r_pointer < arr.len() {
-        if sum > target {
-            sum -= unsafe { arr.get_unchecked(l_pointer) };
-            l_pointer += 1;
-        } else {
-            if sum == target {
-                counter += 1;
-            }
-            sum += unsafe { arr.get_unchecked(r_pointer) };
-            r_pointer += 1;
+    for num in (0..n).map(|_| (scan.token::<i64>())) {
+        sum += num;
+        #[allow(clippy::cast_possible_truncation)] // ok given constraints
+        let next_mod: usize = sum.rem_euclid(n) as usize;
+        unsafe {
+            counter += mods.get_unchecked(next_mod);
+            *mods.get_unchecked_mut(next_mod) += 1;
         }
-    }
-    while sum > target {
-        sum -= unsafe { arr.get_unchecked(l_pointer) };
-        l_pointer += 1;
-    }
-    if sum == target {
-        counter += 1;
     }
 
     writeln!(out, "{counter}").unwrap();
@@ -112,11 +100,11 @@ mod test {
     #[test]
     fn test_example() {
         let input = b"\
-5 7
-2 4 1 2 7
+5
+3 1 2 7 4
 ";
         let target = b"\
-3
+1
 ";
 
         test(input, target);
@@ -125,13 +113,38 @@ mod test {
     #[test]
     fn test_example_2() {
         let input = b"\
-5 9
-2 4 1 2 7
+5
+1 2 3 4 5
+";
+        let target = b"\
+4
+";
+
+        test(input, target);
+    }
+
+    #[test]
+    fn test_example_3() {
+        let input = b"\
+6
+1 6 4 2 5 3
+";
+        let target = b"\
+4
+";
+
+        test(input, target);
+    }
+
+    #[test]
+    fn test_negatives() {
+        let input = b"\
+4
+5 -65 -67 -67
 ";
         let target = b"\
 2
 ";
-
         test(input, target);
     }
 }

@@ -55,7 +55,7 @@ use std::collections::HashMap;
 /// <b>Constraints</b>
 ///
 /// <ul>
-/// <li>1 ≤ n, x ≤ 2 * 10<sup>5</sup></li>
+/// <li>1 ≤ n ≤ 2 * 10<sup>5</sup></li>
 /// <li>-10<sup>9</sup> ≤ x,a<sub>i</sub> ≤ 10<sup>9</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
