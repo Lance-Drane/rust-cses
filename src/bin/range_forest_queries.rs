@@ -74,7 +74,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
             forest[row_idx * (n + 1) + col_idx] = forest[(row_idx - 1) * (n + 1) + col_idx]
                 + forest[row_idx * (n + 1) + col_idx - 1]
                 - forest[(row_idx - 1) * (n + 1) + col_idx - 1]
-                + u32::from(cell == b'*')
+                + u32::from(cell == b'*');
         }
     }
 
