@@ -65,15 +65,15 @@ const MAX_FOREST_CAPACITY: usize = 1001 * 1001;
 /// <li>1 ≤ x<sub>1</sub> ≤ x<sub>2</sub> ≤ n</li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let n: usize = scan.token();
+    let n = scan.token::<usize>() + 1;
     let q: u32 = scan.token();
 
     let mut forest: Vec<u32> = vec![0; MAX_FOREST_CAPACITY];
-    for (row_idx, row) in (1..=n).map(|n| (n, scan.token::<String>().into_bytes())) {
-        for (cell, col_idx) in row.into_iter().zip(1..=n) {
-            forest[row_idx * (n + 1) + col_idx] = forest[(row_idx - 1) * (n + 1) + col_idx]
-                + forest[row_idx * (n + 1) + col_idx - 1]
-                - forest[(row_idx - 1) * (n + 1) + col_idx - 1]
+    for (row_idx, row) in (1..n).map(|idx| (idx, scan.token::<String>().into_bytes())) {
+        for (cell, col_idx) in row.into_iter().zip(1..n) {
+            forest[row_idx * n + col_idx] = forest[(row_idx - 1) * n + col_idx]
+                + forest[row_idx * n + col_idx - 1]
+                - forest[(row_idx - 1) * n + col_idx - 1]
                 + u32::from(cell == b'*');
         }
     }
@@ -85,10 +85,9 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         let x2: usize = scan.token();
 
         writeln!(out, "{}", unsafe {
-            forest.get_unchecked(y2 * (n + 1) + x2)
-                + forest.get_unchecked((y1 - 1) * (n + 1) + x1 - 1)
-                - forest.get_unchecked(y2 * (n + 1) + x1 - 1)
-                - forest.get_unchecked((y1 - 1) * (n + 1) + x2)
+            forest.get_unchecked(y2 * n + x2) + forest.get_unchecked((y1 - 1) * n + x1 - 1)
+                - forest.get_unchecked(y2 * n + x1 - 1)
+                - forest.get_unchecked((y1 - 1) * n + x2)
         })
         .unwrap();
     }
