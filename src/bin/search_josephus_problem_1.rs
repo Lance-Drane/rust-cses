@@ -61,7 +61,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         circle.rotate_left(1);
         write!(out, "{} ", circle.pop_front().unwrap()).ok();
     }
-    writeln!(out, "{}", circle.get(0).unwrap()).ok();
+    writeln!(out, "{}", circle.front().unwrap()).ok();
 }
 
 // entrypoints //
