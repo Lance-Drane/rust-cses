@@ -64,7 +64,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
     for cube in (0..n).map(|_| scan.token::<u32>()) {
         if cube >= *towers.last().unwrap_or(&0) {
-            towers.push(cube)
+            towers.push(cube);
         } else {
             let mut low = 0;
             let mut high = towers.len();
