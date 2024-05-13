@@ -63,19 +63,19 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut towers = Vec::with_capacity(n as usize);
 
     for cube in (0..n).map(|_| scan.token::<u32>()) {
-        let mut low = 0;
-        let mut high = towers.len();
-        while low < high {
-            let mid = (low + high) >> 1;
-            if towers[mid] > cube {
-                high = mid;
-            } else {
-                low = mid + 1;
-            }
-        }
-        if low == towers.len() {
-            towers.push(cube);
+        if cube >= *towers.last().unwrap_or(&0) {
+            towers.push(cube)
         } else {
+            let mut low = 0;
+            let mut high = towers.len();
+            while low < high {
+                let mid = (low + high) >> 1;
+                if towers[mid] > cube {
+                    high = mid;
+                } else {
+                    low = mid + 1;
+                }
+            }
             towers[low] = cube;
         }
     }
