@@ -41,7 +41,7 @@ impl UnsafeScanner<'_> {
 const BOUND_NUM: usize = 0xFFF_FFF_FFF_FFF_FFE;
 
 /// this implementation only works for values less than `usize::MAX` / 2,
-/// idea is that values = `BOUND_NUM` are not joined, values < `BOUND_NUM` are an index,
+/// idea is that values = `BOUND_NUM` are not joined, values < `BOUND_NUM` are a child, values > `BOUND_NUM` are a parent.
 struct DisjointSet {
     parents: Vec<usize>,
 }
