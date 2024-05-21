@@ -181,8 +181,8 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
     let mut answer = vec![0; additional_comps];
     let mut parent = *parents.last().unwrap();
-    for idx in (0..additional_comps).rev() {
-        answer[idx] = parent;
+    for ans in answer.iter_mut().rev() {
+        *ans = parent;
         parent = parents[parent];
     }
 
