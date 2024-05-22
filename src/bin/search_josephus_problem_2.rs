@@ -1234,9 +1234,6 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
-// use std::collections::VecDeque;
-// use std::collections::BTreeSet;
-
 /// Consider a game where there are n children (numbered 1,2,...,n) in a circle. During the game, repeatedly k children are skipped and one child is removed from the circle. In which order will the children be removed?
 ///
 /// <b>Input</b>
