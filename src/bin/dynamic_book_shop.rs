@@ -66,17 +66,22 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let max_price: usize = scan.token();
 
     let prices: Vec<usize> = (0..n).map(|_| scan.token()).collect();
-    let pages: Vec<u32> = (0..n).map(|_| scan.token()).collect();
 
     let mut cache = vec![0; max_price + 1];
 
-    for (price, page) in prices.into_iter().zip(pages.into_iter()) {
-        for total in (price..=max_price).rev() {
-            cache[total] = std::cmp::max(cache[total], cache[total - price] + page);
+    for price in prices {
+        let page: u32 = scan.token();
+        let mut cache_cp = cache.as_mut_slice();
+        while cache_cp.len() > price {
+            let (left, right) = cache_cp.split_at_mut(price);
+            for (a, b) in left.iter_mut().zip(right.iter()) {
+                *a = (*b + page).max(*a);
+            }
+            cache_cp = right;
         }
     }
 
-    writeln!(out, "{}", cache[max_price]).unwrap();
+    writeln!(out, "{}", cache[0]).unwrap();
 }
 
 // entrypoints //

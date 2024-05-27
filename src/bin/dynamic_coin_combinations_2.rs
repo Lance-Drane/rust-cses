@@ -38,7 +38,7 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
-const MODULO: usize = 1_000_000_007;
+const MODULO: u32 = 1_000_000_007;
 
 /// Consider a money system consisting of n coins. Each coin has a positive integer value. Your task is to calculate the number of distinct ordered ways you can produce a money sum x using the available coins.
 ///
@@ -73,12 +73,16 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     cache[0] = 1;
 
     for coin in (0..capacity).map(|_| scan.token::<usize>()) {
-        for idx in coin..=target {
-            let mut next = cache[idx] + cache[idx - coin];
-            if next >= MODULO {
-                next -= MODULO;
+        let mut cache_cp = cache.as_mut_slice();
+        while cache_cp.len() > coin {
+            let (left, right) = cache_cp.split_at_mut(coin);
+            for (a, b) in left.iter().zip(right.iter_mut()) {
+                *b += *a;
+                if *b >= MODULO {
+                    *b -= MODULO;
+                }
             }
-            cache[idx] = next;
+            cache_cp = right;
         }
     }
 

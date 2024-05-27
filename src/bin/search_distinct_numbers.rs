@@ -1,64 +1,3 @@
-// a hasher which doesn't actually hash - see https://github.com/paritytech/nohash-hasher for LICENSE text
-// only use this for integer types
-
-use core::{
-    hash::{BuildHasherDefault, Hasher},
-    marker::PhantomData,
-};
-
-pub type IntSet<T> = std::collections::HashSet<T, BuildHasherDefault<NoHashHasher<T>>>;
-
-#[derive(Debug, Default, Clone, Copy)]
-pub struct NoHashHasher<T>(u64, PhantomData<T>);
-
-pub trait IsEnabled {}
-macro_rules! impl_IsEnabled {
-    (for $($t:ty),+) => {
-        $(impl IsEnabled for $t {})*
-    }
-}
-impl_IsEnabled!(for u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
-
-#[allow(clippy::cast_sign_loss)]
-impl<T: IsEnabled> Hasher for NoHashHasher<T> {
-    fn write(&mut self, _: &[u8]) {
-        panic!("Invalid use of NoHashHasher")
-    }
-    fn write_u8(&mut self, n: u8) {
-        self.0 = u64::from(n);
-    }
-    fn write_u16(&mut self, n: u16) {
-        self.0 = u64::from(n);
-    }
-    fn write_u32(&mut self, n: u32) {
-        self.0 = u64::from(n);
-    }
-    fn write_u64(&mut self, n: u64) {
-        self.0 = n;
-    }
-    fn write_usize(&mut self, n: usize) {
-        self.0 = n as u64;
-    }
-    fn write_i8(&mut self, n: i8) {
-        self.0 = n as u64;
-    }
-    fn write_i16(&mut self, n: i16) {
-        self.0 = n as u64;
-    }
-    fn write_i32(&mut self, n: i32) {
-        self.0 = n as u64;
-    }
-    fn write_i64(&mut self, n: i64) {
-        self.0 = n as u64;
-    }
-    fn write_isize(&mut self, n: isize) {
-        self.0 = n as u64;
-    }
-    fn finish(&self) -> u64 {
-        self.0
-    }
-}
-
 // I/O boilerplate //
 
 pub struct UnsafeScanner<'a> {
@@ -99,6 +38,8 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
+use std::collections::HashSet;
+
 /// You are given a list of n integers, and your task is to calculate the number of distinct values in the list.
 ///
 /// <b>Input</b>
@@ -125,7 +66,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         "{}",
         (0..n)
             .map(|_| scan.token::<u32>())
-            .collect::<IntSet<_>>()
+            .collect::<HashSet<_>>()
             .len()
     )
     .ok();

@@ -38,7 +38,7 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
-const MODULO: u32 = 1_000_000_007;
+const DEFAULT: u32 = 1_000_000_007;
 
 /// Consider a money system consisting of n coins. Each coin has a positive integer value. Your task is to produce a sum of money x using the available coins in such a way that the number of coins is minimal.
 ///
@@ -65,19 +65,27 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let capacity: u8 = scan.token();
     let target: usize = scan.token();
 
-    let mut cache = vec![MODULO; target + 1];
+    let mut cache = vec![DEFAULT; target + 1];
     cache[0] = 0;
 
     for coin in (0..capacity).map(|_| scan.token::<usize>()) {
-        for idx in coin..=target {
-            cache[idx] = std::cmp::min(cache[idx], cache[idx - coin] + 1);
+        let mut cache_cp = cache.as_mut_slice();
+        while cache_cp.len() > coin {
+            let (left, right) = cache_cp.split_at_mut(coin);
+            for (a, b) in left.iter().zip(right.iter_mut()) {
+                *b = (*a + 1).min(*b);
+            }
+            cache_cp = right;
         }
     }
 
-    if cache[target] == MODULO {
-        out.write_all(b"-1\n").ok();
-    } else {
-        writeln!(out, "{}", cache[target]).ok();
+    match unsafe { *cache.get_unchecked(target) } {
+        DEFAULT => {
+            out.write_all(b"-1\n").unwrap();
+        }
+        n => {
+            writeln!(out, "{n}").unwrap();
+        }
     }
 }
 
