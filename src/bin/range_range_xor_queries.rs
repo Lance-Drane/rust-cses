@@ -46,7 +46,7 @@ impl UnsafeScanner<'_> {
 ///
 /// The second line has n integers x<sub>1</sub>,x<sub>2</sub>,...,x<sub>n</sub>: the array values.
 ///
-/// Finally, there are q lines describing the queries. Each line has two integers a and b: what is the sum of values in range [a,b]?
+/// Finally, there are q lines describing the queries. Each line has two integers a and b: what is the xor sum of values in range [a,b]?
 ///
 /// <b>Output</b>
 ///
