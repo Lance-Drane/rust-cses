@@ -38,7 +38,7 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
-/// Given an array of n integers, your task is to process q queries of the form: what is the sum of values in range [a,b]?
+/// Given an array of n integers, your task is to process q queries of the form: what is the xor sum of values in range [a,b]?
 ///
 /// <b>Input</b>
 ///
@@ -66,16 +66,15 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut sum = 0;
     let values: Vec<_> = std::iter::once(0)
         .chain((0..n).map(|_| {
-            sum += scan.token::<u64>();
+            sum ^= scan.token::<u32>();
             sum
         }))
         .collect();
 
     for _ in 0..q {
-        let left = scan.token::<usize>() - 1;
-        let right = scan.token::<usize>();
         writeln!(out, "{}", unsafe {
-            values.get_unchecked(right) - values.get_unchecked(left)
+            values.get_unchecked(scan.token::<usize>() - 1)
+                ^ values.get_unchecked(scan.token::<usize>())
         })
         .unwrap();
     }
@@ -112,9 +111,9 @@ mod test {
 3 3
 ";
         let target = b"\
-11
-2
-24
+3
+0
+6
 4
 ";
 
