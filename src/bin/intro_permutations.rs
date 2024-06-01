@@ -58,24 +58,23 @@ impl UnsafeScanner<'_> {
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let num = scan.token::<u32>();
 
-    match num {
-        2 | 3 => {
-            out.write_all(b"NO SOLUTION\n").ok();
+    if num == 2 || num == 3 {
+        out.write_all(b"NO SOLUTION\n").unwrap();
+    } else {
+        for i in (2..(num + 1)).step_by(2) {
+            write!(out, "{i} ").unwrap();
         }
-        n => {
-            (2..=n).step_by(2).chain((1..=n).step_by(2)).for_each(|i| {
-                write!(out, "{i} ").ok();
-            });
-            out.write_all(b"\n").ok();
+        for i in (1..(num + 1)).step_by(2) {
+            write!(out, "{i} ").unwrap();
         }
-    };
+    }
 }
 
 // entrypoints //
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 
@@ -100,8 +99,7 @@ mod test {
 1
 ";
         let target = b"\
-1 
-";
+1 ";
 
         test(input, target);
     }
@@ -112,8 +110,7 @@ mod test {
 5
 ";
         let target = b"\
-2 4 1 3 5 
-";
+2 4 1 3 5 ";
 
         test(input, target);
     }
