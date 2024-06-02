@@ -88,7 +88,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         exponent >>= 1;
     }
 
-    writeln!(out, "{}", goal[0][0]).ok();
+    writeln!(out, "{}", goal[0][0]).unwrap();
 }
 
 fn multiply_matrix(a: &Matrix, b: &Matrix) -> Matrix {

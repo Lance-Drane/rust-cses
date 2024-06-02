@@ -71,7 +71,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         &mut visited_diag_tr_bl,
     );
 
-    writeln!(out, "{counter}").ok();
+    writeln!(out, "{counter}").unwrap();
 }
 
 fn recurse(

@@ -74,7 +74,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         best = best.max(idx - l_pointer);
     }
 
-    writeln!(out, "{best}").ok();
+    writeln!(out, "{best}").unwrap();
 }
 
 // entrypoints //

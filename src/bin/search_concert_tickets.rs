@@ -79,7 +79,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     for customer in (0..m).map(|_| scan.token::<u32>()) {
         match ticket_counter.range_mut(..=customer).next_back() {
             Some((&ticket, count)) => {
-                writeln!(out, "{ticket}").ok();
+                writeln!(out, "{ticket}").unwrap();
                 if *count == 1 {
                     ticket_counter.remove(&ticket);
                 } else {
@@ -87,7 +87,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
                 }
             }
             None => {
-                out.write_all(b"-1\n").ok();
+                out.write_all(b"-1\n").unwrap();
             }
         };
     }
@@ -97,7 +97,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

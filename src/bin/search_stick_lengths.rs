@@ -73,7 +73,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
             .into_iter()
             .fold(0, |acc, curr| acc + (curr - target).abs())
     )
-    .ok();
+    .unwrap();
 }
 
 // entrypoints //

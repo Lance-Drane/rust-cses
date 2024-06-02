@@ -69,7 +69,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         }
         sum += coin;
     }
-    writeln!(out, "{sum}").ok();
+    writeln!(out, "{sum}").unwrap();
 }
 
 // entrypoints //

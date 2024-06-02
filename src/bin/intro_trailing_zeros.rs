@@ -64,7 +64,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         answer += token;
     }
 
-    writeln!(out, "{answer}").ok();
+    writeln!(out, "{answer}").unwrap();
 }
 
 // entrypoints //

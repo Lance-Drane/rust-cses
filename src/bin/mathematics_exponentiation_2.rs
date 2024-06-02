@@ -89,7 +89,7 @@ fn fastpow(mut base: u64, mut exponent: u64, modulo: u64) -> u64 {
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

@@ -59,7 +59,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let exponent = scan.token::<usize>();
 
     for num in 0..(1 << exponent) {
-        writeln!(out, "{:0exponent$b}", num ^ (num >> 1)).ok();
+        writeln!(out, "{:0exponent$b}", num ^ (num >> 1)).unwrap();
     }
 }
 
@@ -67,7 +67,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

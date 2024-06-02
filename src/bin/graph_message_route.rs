@@ -198,7 +198,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

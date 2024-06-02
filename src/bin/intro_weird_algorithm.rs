@@ -61,21 +61,21 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut token = scan.token::<u64>();
 
     while token != 1 {
-        write!(out, "{token} ").ok();
+        write!(out, "{token} ").unwrap();
         token = if token & 1 == 0 {
             token >> 1
         } else {
             token * 3 + 1
         };
     }
-    out.write_all(b"1\n").ok();
+    out.write_all(b"1\n").unwrap();
 }
 
 // entrypoints //
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

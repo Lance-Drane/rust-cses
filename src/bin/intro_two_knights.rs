@@ -74,7 +74,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         // ALL knight moves of square with N length = (n - 1) * (n - 2) * 8
         let all_knight_moves = (rows - 1) * (rows.wrapping_sub(2)) * 4; // allow underflow on k = 1
         let safe_knight_moves = combinations - all_knight_moves;
-        writeln!(out, "{safe_knight_moves}").ok();
+        writeln!(out, "{safe_knight_moves}").unwrap();
     }
 }
 
@@ -82,7 +82,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

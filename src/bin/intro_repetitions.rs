@@ -71,7 +71,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
             })
             .0
     )
-    .ok();
+    .unwrap();
 }
 
 // entrypoints //

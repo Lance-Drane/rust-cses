@@ -59,16 +59,16 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut circle: VecDeque<u32> = (1..=scan.token()).collect();
     while circle.len() > 1 {
         circle.rotate_left(1);
-        write!(out, "{} ", circle.pop_front().unwrap()).ok();
+        write!(out, "{} ", circle.pop_front().unwrap()).unwrap();
     }
-    writeln!(out, "{}", circle.front().unwrap()).ok();
+    writeln!(out, "{}", circle.front().unwrap()).unwrap();
 }
 
 // entrypoints //
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

@@ -65,7 +65,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     for (count, letter) in counter.iter().zip(b'A'..) {
         if count & 1 == 1 {
             if odd_letter != b'\0' {
-                out.write_all(b"NO SOLUTION\n").ok();
+                out.write_all(b"NO SOLUTION\n").unwrap();
                 return;
             }
             odd_letter = letter;
@@ -88,15 +88,15 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         }
     }
 
-    out.write_all(&token).ok();
-    out.write_all(&[b'\n']).ok();
+    out.write_all(&token).unwrap();
+    out.write_all(&[b'\n']).unwrap();
 }
 
 // entrypoints //
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

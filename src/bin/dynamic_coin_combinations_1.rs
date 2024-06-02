@@ -88,7 +88,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
             % MODULO;
     }
 
-    writeln!(out, "{}", cache[target]).ok();
+    writeln!(out, "{}", cache[target]).unwrap();
 }
 
 // entrypoints //

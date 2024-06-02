@@ -75,7 +75,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let mut count = 0;
     recurse(0, (1, 1), &mut count, &mut visited, &path);
 
-    writeln!(out, "{count}").ok();
+    writeln!(out, "{count}").unwrap();
 }
 
 #[allow(clippy::too_many_lines)]

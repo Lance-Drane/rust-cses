@@ -56,54 +56,34 @@ impl UnsafeScanner<'_> {
 /// <li>1 ≤ n ≤ 10<sup>6</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let token = scan.token::<i32>();
+    let token = scan.token::<u32>();
 
     match token & 3 {
         3 => {
-            out.write_all(b"YES\n").ok();
-            let size = token / 2;
-            let step = token / 4;
-            let quarter = 4 + step;
-            let three_quarter = token - step + 1;
-
-            writeln!(out, "{}", size + 1).ok();
-
-            (4..quarter).chain(three_quarter..=token).for_each(|i| {
-                write!(out, "{i} ").ok();
-            });
-            out.write_all(b"1 2\n").ok();
-
-            writeln!(out, "{size}").ok();
-
-            for i in quarter..three_quarter {
-                write!(out, "{i} ").ok();
+            write!(out, "YES\n{}\n1 2 ", (token + 1) >> 1).unwrap();
+            for i in (4..(token + 1)).step_by(4) {
+                write!(out, "{} {} ", i, i + 3).unwrap();
             }
-            out.write_all(b"3\n").ok();
+            write!(out, "\n{}\n3 ", token >> 1).unwrap();
+            for i in (4..(token + 1)).step_by(4) {
+                write!(out, "{} {} ", i + 1, i + 2).unwrap();
+            }
+            out.write_all(b"\n").unwrap();
         }
         0 => {
-            out.write_all(b"YES\n").ok();
             let size = token / 2;
-            let quarter = size / 2;
-            let three_quarter = token - quarter;
-
-            writeln!(out, "{size}").ok();
-
-            (1..=quarter)
-                .chain((three_quarter + 1)..token)
-                .for_each(|i| {
-                    write!(out, "{i} ").ok();
-                });
-            writeln!(out, "{token}").ok();
-
-            writeln!(out, "{size}").ok();
-
-            for i in (quarter + 1)..three_quarter {
-                write!(out, "{i} ").ok();
+            writeln!(out, "YES\n{size}").unwrap();
+            for i in (1..(token + 1)).step_by(4) {
+                write!(out, "{} {} ", i, i + 3).unwrap();
             }
-            writeln!(out, "{three_quarter}").ok();
+            writeln!(out, "\n{size}").unwrap();
+            for i in (1..(token + 1)).step_by(4) {
+                write!(out, "{} {} ", i + 1, i + 2).unwrap();
+            }
+            out.write_all(b"\n").unwrap();
         }
         _ => {
-            out.write_all(b"NO\n").ok();
+            out.write_all(b"NO\n").unwrap();
         }
     };
 }
@@ -112,7 +92,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 
@@ -138,9 +118,9 @@ mod test {
         let target = b"\
 YES
 4
-4 7 1 2
+1 2 4 7 
 3
-5 6 3
+3 5 6 
 ";
 
         test(input, target);
@@ -154,9 +134,9 @@ YES
         let target = b"\
 YES
 6
-4 5 10 11 1 2
+1 2 4 7 8 11 
 5
-6 7 8 9 3
+3 5 6 9 10 
 ";
 
         test(input, target);
@@ -170,9 +150,9 @@ YES
         let target = b"\
 YES
 2
-1 2
+1 2 
 1
-3
+3 
 ";
 
         test(input, target);
@@ -186,9 +166,9 @@ YES
         let target = b"\
 YES
 2
-1 4
+1 4 
 2
-2 3
+2 3 
 ";
 
         test(input, target);
@@ -202,9 +182,9 @@ YES
         let target = b"\
 YES
 6
-1 2 3 10 11 12
+1 4 5 8 9 12 
 6
-4 5 6 7 8 9
+2 3 6 7 10 11 
 ";
 
         test(input, target);

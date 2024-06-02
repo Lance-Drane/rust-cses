@@ -62,7 +62,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         "{}",
         (1..upper_bound).fold(upper_bound, |acc, num| acc ^ num ^ scan.token::<u32>())
     )
-    .ok();
+    .unwrap();
 }
 
 // entrypoints //

@@ -66,12 +66,12 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
     for (value, idx) in (1..=n).map(|n| (scan.token(), n)) {
         if let Some(prev) = lookups.get(&(target - value)) {
-            writeln!(out, "{prev} {idx}").ok();
+            writeln!(out, "{prev} {idx}").unwrap();
             return;
         }
         lookups.insert(value, idx);
     }
-    out.write_all(b"IMPOSSIBLE\n").ok();
+    out.write_all(b"IMPOSSIBLE\n").unwrap();
 }
 
 // entrypoints //

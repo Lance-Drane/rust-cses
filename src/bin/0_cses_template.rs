@@ -9,6 +9,7 @@ pub struct UnsafeScanner<'a> {
 
 impl UnsafeScanner<'_> {
     pub fn new<R: std::io::Read>(mut reader: R) -> Self {
+        // note that even for stdin-heavy problems, allocating initial capacity is less efficient due to how read_to_end works
         let mut buf_str = vec![];
         unsafe {
             reader.read_to_end(&mut buf_str).unwrap_unchecked();
@@ -56,13 +57,17 @@ impl UnsafeScanner<'_> {
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let a = scan.token::<i32>();
     let b = scan.token::<i32>();
-    writeln!(out, "{}", a + b).ok();
+    writeln!(out, "{}", a + b).unwrap();
 }
 
 // entrypoints //
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
+    // you can also use BufWriter::with_capacity(32_768, std::io::stdout().lock()) for stdout-heavy problems
+    // larger buffers give diminishing returns
+    // for problems where you only print one line, it may be best to just use println!()
+    // (you should probably always wrap stdout in a BufWriter, otherwise you may get an unneeded "double flush" (when newline is encountered & when the writer is dropped from mem))
     let mut out = std::io::BufWriter::new(std::io::stdout().lock());
     solve(scan, &mut out);
 }

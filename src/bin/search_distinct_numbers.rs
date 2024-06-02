@@ -69,7 +69,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
             .collect::<HashSet<_>>()
             .len()
     )
-    .ok();
+    .unwrap();
 }
 
 // entrypoints //

@@ -62,18 +62,18 @@ impl UnsafeScanner<'_> {
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let discs = scan.token::<u8>();
 
-    writeln!(out, "{}", (1 << discs) - 1).ok();
+    writeln!(out, "{}", (1 << discs) - 1).unwrap();
     recurse(out, b'1', b'3', b'2', discs);
 }
 
 // supporting recursive function, just swap the positions around
 fn recurse<W: std::io::Write>(out: &mut W, from: u8, to: u8, swap: u8, disc: u8) {
     if disc == 1 {
-        out.write_all(&[from, b' ', to, b'\n']).ok();
+        out.write_all(&[from, b' ', to, b'\n']).unwrap();
         return;
     }
     recurse(out, from, swap, to, disc - 1);
-    out.write_all(&[from, b' ', to, b'\n']).ok();
+    out.write_all(&[from, b' ', to, b'\n']).unwrap();
     recurse(out, swap, to, from, disc - 1);
 }
 
@@ -81,7 +81,7 @@ fn recurse<W: std::io::Write>(out: &mut W, from: u8, to: u8, swap: u8, disc: u8)
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

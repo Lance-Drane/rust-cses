@@ -72,7 +72,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     }
     weights.reverse();
 
-    writeln!(out, "{}", min_diff(0, &apples, &weights, 0, n - 1)).ok();
+    writeln!(out, "{}", min_diff(0, &apples, &weights, 0, n - 1)).unwrap();
 }
 
 fn min_diff(

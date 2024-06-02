@@ -71,7 +71,7 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         exponent >>= 1;
     }
 
-    writeln!(out, "{goal}").ok();
+    writeln!(out, "{goal}").unwrap();
 }
 
 // entrypoints //

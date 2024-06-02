@@ -69,8 +69,8 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
         tmp_buf.push(b'\n');
     }
 
-    writeln!(out, "{}", tmp_buf.len() / (string.len() + 1)).ok();
-    out.write_all(&tmp_buf).ok();
+    writeln!(out, "{}", tmp_buf.len() / (string.len() + 1)).unwrap();
+    out.write_all(&tmp_buf).unwrap();
 }
 
 fn next_permutation<T: std::cmp::Ord>(slice: &mut [T]) -> bool {
@@ -99,7 +99,7 @@ fn next_permutation<T: std::cmp::Ord>(slice: &mut [T]) -> bool {
 
 fn main() {
     let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
+    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
     solve(scan, &mut out);
 }
 

@@ -78,9 +78,9 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
             base = multiply_matrix(&base, &base);
             n >>= 1;
         }
-        writeln!(out, "{}", goal[0]).ok();
+        writeln!(out, "{}", goal[0]).unwrap();
     } else {
-        writeln!(out, "{n}").ok();
+        writeln!(out, "{n}").unwrap();
     }
 }
 
