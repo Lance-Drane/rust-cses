@@ -63,4 +63,4 @@ jobs:
           toolchain: stable
           components: clippy
       - name: Linting
-        run: cargo clippy --all-targets --all-features -- -Wclippy::pedantic -Aclippy::range_plus_one -Dwarnings
+        run: ./clippy.sh
