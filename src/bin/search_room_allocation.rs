@@ -86,23 +86,18 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 
     let mut max_rooms = 1_u32;
 
-    for next_in in waitlist.into_iter().skip(1) {
+    for (arrive, depart, idx) in waitlist.into_iter().skip(1) {
         let next_out = staylist.peek().unwrap().0;
 
-        if next_in.0 > next_out.0 {
-            // next guest to leave has left, give them the old room
-            let next_out = staylist.pop().unwrap().0;
-            staylist.push(Reverse((next_in.1, next_out.1)));
-            unsafe {
-                *ans.get_unchecked_mut(next_in.2) = next_out.1;
-            }
+        let room = if arrive > next_out.0 {
+            staylist.pop().unwrap().0 .1
         } else {
-            // next guest to leave still staying, give new guest a new room
             max_rooms += 1;
-            staylist.push(Reverse((next_in.1, max_rooms)));
-            unsafe {
-                *ans.get_unchecked_mut(next_in.2) = max_rooms;
-            }
+            max_rooms
+        };
+        staylist.push(Reverse((depart, room)));
+        unsafe {
+            *ans.get_unchecked_mut(idx) = room;
         }
     }
 
