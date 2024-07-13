@@ -651,8 +651,6 @@ impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 // problem //
 
-const MAX_INPUT_BYTES: usize = 2_200_007; // 7 max bytes for first line, 22 max bytes for each query line
-
 /// Consider a game where there are n children (numbered 1,2,...,n) in a circle. During the game, every other child is removed from the circle until there are no children left.
 ///
 /// Your task is to process q queries of the form: "when there are n children, who is the kth child that will be removed?"
@@ -710,7 +708,7 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
 // entrypoints //
 
 fn main() {
-    let mut buf_str = Vec::with_capacity(MAX_INPUT_BYTES);
+    let mut buf_str = vec![];
     std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
     let mut out = std::io::stdout().lock();
     solve(&buf_str, &mut out);

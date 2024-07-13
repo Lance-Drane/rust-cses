@@ -714,7 +714,7 @@ pub mod itoap {
     }
 }
 
-/// Size of the output buffer.
+/// Size of the output buffer. Larger capacities don't seem to help, note that this is OS dependent.
 const BUF_SIZE: usize = 32_768;
 
 /// Custom buffer around a writer
@@ -913,8 +913,6 @@ impl_float!((f32, i32));
 
 // problem //
 
-const MAX_INPUT_BYTES: usize = 18; // number can be up to 8 bytes (-1000000), two numbers, two whitespace chars
-
 /// Given two numbers A and B, calculate their sum A+B.
 ///
 /// <b>Input</b>
@@ -952,12 +950,9 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
 // entrypoints //
 
 fn main() {
-    // you may want to allocate full capacity here (determine maximum buffer size from input constraints), but partial allocations seem to be slower
-    // so if you don't want to compute the vec size, just use a Vector without initialized capacity
-    let mut buf_str = Vec::with_capacity(MAX_INPUT_BYTES);
-    // use the APIs which work off of Vec<u8>
+    // When reading from STDIN, it's fastest to use a vec with no capacity.
+    let mut buf_str = vec![];
     std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
-    // larger capacities don't seem to help, note that this is somewhat OS dependent.
     let mut out = std::io::stdout().lock();
     solve(&buf_str, &mut out);
 }
