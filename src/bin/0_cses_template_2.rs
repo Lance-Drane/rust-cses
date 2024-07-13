@@ -253,7 +253,7 @@ pub mod itoap {
             const POW_10_8: u64 = 100000000;
             const POW_10_16: u64 = 10000000000000000;
 
-            debug_assert!(n > core::u64::MAX as u128);
+            debug_assert!(n > u64::MAX as u128);
 
             // hold per-8-digits results
             // i.e. result[0] holds n % 10^8, result[1] holds (n / 10^8) % 10^8, ...
@@ -272,7 +272,7 @@ pub mod itoap {
                 result[0] = (rem % POW_10_8) as u32;
 
                 debug_assert_ne!(n, 0);
-                debug_assert!(n <= core::u128::MAX / POW_10_16 as u128);
+                debug_assert!(n <= u128::MAX / POW_10_16 as u128);
             }
 
             let result_len = if n >= POW_10_16 as u128 {
@@ -309,7 +309,7 @@ pub mod itoap {
 
         #[inline]
         pub unsafe fn write_u128(n: u128, buf: *mut u8) -> usize {
-            if n <= core::u64::MAX as u128 {
+            if n <= u64::MAX as u128 {
                 super::write_u64(n as u64, buf)
             } else {
                 write_u128_big(n, buf)
@@ -651,7 +651,7 @@ pub mod itoap {
     /// `Vec::reserve()` if the `Vec` doesn't have enough capacity.
     #[inline]
     pub fn write_to_vec<V: Integer>(buf: &mut Vec<u8>, value: V) {
-        debug_assert!(buf.len() <= core::isize::MAX as usize);
+        debug_assert!(buf.len() <= isize::MAX as usize);
 
         // benchmark result suggests that we gain more speed by manually checking the
         // buffer capacity and limits `reserve()` call
@@ -811,6 +811,7 @@ pub trait PosInt {
 macro_rules! impl_posint {
     (for $($t:ty),+) => {
         $(impl PosInt for $t {
+            #[allow(clippy::cast_lossless, clippy::cast_possible_wrap)]
             fn to_posint(buf: &[u8]) -> Self {
                 unsafe {
                     buf.iter()
@@ -830,6 +831,7 @@ pub trait AnyInt {
 macro_rules! impl_sint {
     (for $($t:ty),+) => {
         $(impl AnyInt for $t {
+            #[allow(clippy::cast_lossless, clippy::cast_possible_wrap)]
             fn to_anyint(buf: &[u8]) -> Self {
                 let (neg, digits) = match buf {
                     [b'-', digits @ ..] => (true, digits),
@@ -856,12 +858,13 @@ impl_sint!(for i8, i16, i32, i64, i128, isize);
 
 /// NOTE: This does NOT accept scientific notation or "inf/NaN"
 pub trait AnyFloat {
-    fn from_bytes(buf: &[u8]) -> Self;
+    fn to_float(buf: &[u8]) -> Self;
 }
 macro_rules! impl_float {
     (($t:ty, $ti:ty)) => {
         impl AnyFloat for $t {
-            fn from_bytes(buf: &[u8]) -> Self {
+            #[allow(clippy::cast_lossless, clippy::cast_possible_wrap, clippy::cast_precision_loss)]
+            fn to_float(buf: &[u8]) -> Self {
                 let (neg, first_digit, digits) = match buf {
                     [b'-', first, digits @ ..] => (true, first, digits),
                     [first, digits @ ..] => (false, first, digits),

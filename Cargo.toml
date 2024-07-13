@@ -2,6 +2,7 @@
 name = "rust-cses"
 version = "0.1.0"
 edition = "2018"
+publish = false
 
 description = "Solutions for the CSES (Code Submission Evaluation System) problem set"
 repository = "https://github.com/Lance-Drane/rust-cses"
@@ -14,3 +15,12 @@ license = "MIT"
 
 [dependencies]
 rand = "0.8.5"
+
+[lints]
+workspace = true
+
+[workspace.lints.clippy]
+# add pedantic ruleset by default, configure per rule
+pedantic = "warn"
+# allow this one because (..=n) range syntax usually gets compiled into worse assembly
+range_plus_one = "allow"
