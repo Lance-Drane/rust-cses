@@ -913,6 +913,8 @@ impl_float!((f32, i32));
 
 // problem //
 
+const MAX_INPUT_BYTES: usize = 18; // number can be up to 8 bytes (-1000000), two numbers, two whitespace chars
+
 /// Given two numbers A and B, calculate their sum A+B.
 ///
 /// <b>Input</b>
@@ -952,7 +954,7 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
 fn main() {
     // you may want to allocate full capacity here (determine maximum buffer size from input constraints), but partial allocations seem to be slower
     // so if you don't want to compute the vec size, just use a Vector without initialized capacity
-    let mut buf_str = vec![];
+    let mut buf_str = Vec::with_capacity(MAX_INPUT_BYTES);
     // use the APIs which work off of Vec<u8>
     std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
     // larger capacities don't seem to help, note that this is somewhat OS dependent.
