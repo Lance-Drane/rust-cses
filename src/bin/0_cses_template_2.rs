@@ -863,7 +863,11 @@ pub trait AnyFloat {
 macro_rules! impl_float {
     (($t:ty, $ti:ty)) => {
         impl AnyFloat for $t {
-            #[allow(clippy::cast_lossless, clippy::cast_possible_wrap, clippy::cast_precision_loss)]
+            #[allow(
+                clippy::cast_lossless,
+                clippy::cast_possible_wrap,
+                clippy::cast_precision_loss
+            )]
             fn to_float(buf: &[u8]) -> Self {
                 let (neg, first_digit, digits) = match buf {
                     [b'-', first, digits @ ..] => (true, first, digits),

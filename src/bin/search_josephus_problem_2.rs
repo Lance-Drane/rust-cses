@@ -1211,7 +1211,10 @@ impl UnsafeScanner<'_> {
         }
         let buf_iter = unsafe {
             let slice = std::str::from_utf8_unchecked(&buf_str);
-            std::mem::transmute::<std::str::SplitAsciiWhitespace<'_>, std::str::SplitAsciiWhitespace<'_>>(slice.split_ascii_whitespace())
+            std::mem::transmute::<
+                std::str::SplitAsciiWhitespace<'_>,
+                std::str::SplitAsciiWhitespace<'_>,
+            >(slice.split_ascii_whitespace())
         };
 
         Self { buf_str, buf_iter }
