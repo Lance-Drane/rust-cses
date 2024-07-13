@@ -57,17 +57,17 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
     let n: u32 = scan.token();
     let mut remaining = n;
     let mut step = 2;
-    let mut shift = 1;
+    let mut smallest = 1;
 
     while remaining != 0 {
-        let mut child = (step >> 1) + shift;
+        let mut child = (step >> 1) + smallest;
         while child <= n {
             write!(out, "{child} ").unwrap();
             child += step;
         }
         if remaining & 1 == 1 {
-            write!(out, "{shift} ").unwrap();
-            shift += step;
+            write!(out, "{smallest} ").unwrap();
+            smallest += step;
         }
         step <<= 1;
         remaining >>= 1;
