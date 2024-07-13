@@ -38,8 +38,6 @@ impl UnsafeScanner<'_> {
 
 // problem //
 
-use std::collections::VecDeque;
-
 /// Consider a game where there are n children (numbered 1,2,...,n) in a circle. During the game, every other child is removed from the circle until there are no children left. In which order will the children be removed?
 ///
 /// <b>Input</b>
@@ -56,12 +54,24 @@ use std::collections::VecDeque;
 /// <li>1 ≤ n ≤ 2 * 10<sup>5</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let mut circle: VecDeque<u32> = (1..=scan.token()).collect();
-    while circle.len() > 1 {
-        circle.rotate_left(1);
-        write!(out, "{} ", circle.pop_front().unwrap()).unwrap();
+    let n: u32 = scan.token();
+    let mut remaining = n;
+    let mut step = 2;
+    let mut shift = 1;
+
+    while remaining != 0 {
+        let mut child = (step >> 1) + shift;
+        while child <= n {
+            write!(out, "{child} ").unwrap();
+            child += step;
+        }
+        if remaining & 1 == 1 {
+            write!(out, "{shift} ").unwrap();
+            shift += step;
+        }
+        step <<= 1;
+        remaining >>= 1;
     }
-    writeln!(out, "{}", circle.front().unwrap()).unwrap();
 }
 
 // entrypoints //
@@ -90,8 +100,7 @@ mod test {
 7
 ";
         let target = b"\
-2 4 6 1 5 3 7
-";
+2 4 6 1 5 3 7 ";
 
         test(input, target);
     }
@@ -102,8 +111,7 @@ mod test {
 12
 ";
         let target = b"\
-2 4 6 8 10 12 3 7 11 5 1 9
-";
+2 4 6 8 10 12 3 7 11 5 1 9 ";
 
         test(input, target);
     }
