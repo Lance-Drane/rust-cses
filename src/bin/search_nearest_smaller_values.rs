@@ -676,7 +676,7 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     let n = unsafe { u32::to_posint(iter.next().unwrap_unchecked()) };
     let mut stack: Vec<(u32, u32)> = Vec::with_capacity(n as usize);
 
-    'outer: for num in (1..=n).map(|idx| {
+    'outer: for num in (1..(n + 1)).map(|idx| {
         (
             unsafe { u32::to_posint(iter.next().unwrap_unchecked()) },
             idx,

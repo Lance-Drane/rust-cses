@@ -24,8 +24,6 @@ macro_rules! impl_int {
 impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 pub trait AnyInt {
-    /// quickly create an integer from a buffer, only checking the first character's ASCII code (for the minus sign).
-    /// Use this if the constraints allow for both positive and negative values
     fn to_anyint(buf: &[u8]) -> Self;
 }
 macro_rules! impl_anyint {

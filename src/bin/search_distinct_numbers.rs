@@ -47,7 +47,7 @@ use std::collections::HashSet;
 /// </ul>
 fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     let mut iter = scan.split(|n| *n <= b' ');
-    let n = unsafe { usize::to_posint(iter.next().unwrap_unchecked()) };
+    let n = unsafe { u32::to_posint(iter.next().unwrap_unchecked()) };
 
     writeln!(
         out,

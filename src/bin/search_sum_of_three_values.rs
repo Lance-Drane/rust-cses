@@ -1,43 +1,27 @@
-// I/O boilerplate //
+// I/O boilerplate
 
-pub struct UnsafeScanner<'a> {
-    // not actually dead code, needed for buf_iter to work
-    #[allow(dead_code)]
-    buf_str: Vec<u8>,
-    buf_iter: std::str::SplitAsciiWhitespace<'a>,
+use std::io::Read;
+
+pub trait PosInt {
+    fn to_posint(buf: &[u8]) -> Self;
 }
 
-impl UnsafeScanner<'_> {
-    pub fn new<R: std::io::Read>(mut reader: R) -> Self {
-        let mut buf_str = vec![];
-        unsafe {
-            reader.read_to_end(&mut buf_str).unwrap_unchecked();
-        }
-        let buf_iter = unsafe {
-            let slice = std::str::from_utf8_unchecked(&buf_str);
-            std::mem::transmute::<
-                std::str::SplitAsciiWhitespace<'_>,
-                std::str::SplitAsciiWhitespace<'_>,
-            >(slice.split_ascii_whitespace())
-        };
-
-        Self { buf_str, buf_iter }
-    }
-
-    /// Use "turbofish" syntax `token::<T>()` to select data type of next token.
-    ///
-    /// # Panics
-    /// Panics if there's no more tokens or if the token cannot be parsed as T.
-    pub fn token<T: std::str::FromStr>(&mut self) -> T {
-        unsafe {
-            self.buf_iter
-                .next()
-                .unwrap_unchecked()
-                .parse()
-                .unwrap_unchecked()
-        }
+macro_rules! impl_int {
+    (for $($t:ty),+) => {
+        $(impl PosInt for $t {
+            #[allow(clippy::cast_lossless, clippy::cast_possible_wrap)]
+            fn to_posint(buf: &[u8]) -> Self {
+                unsafe {
+                    buf.iter()
+                        .map(|byte| (byte & 15) as $t)
+                        .reduce(|acc, digit| acc * 10 + digit)
+                        .unwrap_unchecked()
+                }
+            }
+        })*
     }
 }
+impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 // problem //
 
@@ -59,17 +43,24 @@ impl UnsafeScanner<'_> {
 /// <li>1 ≤ n ≤ 5000</li>
 /// <li>1 ≤ x,a<sub>i</sub> ≤ 10<sup>9</sup></li>
 /// </ul>
-fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let n: u16 = scan.token();
+fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
+    let mut iter = scan.split(|n| *n <= b' ');
+
+    let n = unsafe { u16::to_posint(iter.next().unwrap_unchecked()) };
     if n < 3 {
         out.write_all(b"IMPOSSIBLE\n").unwrap();
         return;
     }
-    let target_sum: u32 = scan.token();
+    let target_sum = unsafe { u32::to_posint(iter.next().unwrap_unchecked()) };
     let maximum_smallest_value = target_sum / 3;
 
-    let mut nums: Vec<(u32, u16)> = (1..=n)
-        .map(|og_idx| (scan.token(), og_idx))
+    let mut nums: Vec<(u32, u16)> = (1..(n + 1))
+        .map(|og_idx| {
+            (
+                unsafe { u32::to_posint(iter.next().unwrap_unchecked()) },
+                og_idx,
+            )
+        })
         .filter(|num| num.0 < target_sum) // skip excessive values
         .collect();
     nums.sort_unstable_by_key(|k| k.0);
@@ -115,9 +106,10 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 // entrypoints //
 
 fn main() {
-    let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
-    solve(scan, &mut out);
+    let mut buf_str = vec![];
+    std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
+    let mut out = std::io::stdout().lock();
+    solve(&buf_str, &mut out);
 }
 
 #[cfg(test)]
@@ -130,9 +122,8 @@ mod test {
     // 3) finally, we print the position of the remaining number possible in conjunction with 1) and 2)
 
     fn test(input: &[u8], target: &[u8]) {
-        let scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
-        solve(scan, &mut out);
+        solve(input, &mut out);
 
         assert_eq!(out, target);
     }
