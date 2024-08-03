@@ -1,43 +1,88 @@
 // I/O boilerplate //
 
-pub struct UnsafeScanner<'a> {
-    // not actually dead code, needed for buf_iter to work
-    #[allow(dead_code)]
-    buf_str: Vec<u8>,
-    buf_iter: std::str::SplitAsciiWhitespace<'a>,
+use std::io::Read;
+
+const BUF_SIZE: usize = 32_768;
+
+pub struct CustomBufWriter<'a, W: std::io::Write> {
+    writer: &'a mut W,
+    buffer: [u8; BUF_SIZE],
+    buffer_pointer: usize,
 }
 
-impl UnsafeScanner<'_> {
-    pub fn new<R: std::io::Read>(mut reader: R) -> Self {
-        let mut buf_str = vec![];
-        unsafe {
-            reader.read_to_end(&mut buf_str).unwrap_unchecked();
+impl<'a, W: std::io::Write> CustomBufWriter<'a, W> {
+    pub fn new(writer: &'a mut W) -> Self {
+        Self {
+            writer,
+            buffer: [0; BUF_SIZE],
+            buffer_pointer: 0,
         }
-        let buf_iter = unsafe {
-            let slice = std::str::from_utf8_unchecked(&buf_str);
-            std::mem::transmute::<
-                std::str::SplitAsciiWhitespace<'_>,
-                std::str::SplitAsciiWhitespace<'_>,
-            >(slice.split_ascii_whitespace())
-        };
-
-        Self { buf_str, buf_iter }
     }
 
-    /// Use "turbofish" syntax `token::<T>()` to select data type of next token.
-    ///
-    /// # Panics
-    /// Panics if there's no more tokens or if the token cannot be parsed as T.
-    pub fn token<T: std::str::FromStr>(&mut self) -> T {
+    pub fn flush(&mut self) {
         unsafe {
-            self.buf_iter
-                .next()
-                .unwrap_unchecked()
-                .parse()
-                .unwrap_unchecked()
+            self.writer
+                .write_all(self.buffer.get_unchecked(..self.buffer_pointer))
+                .unwrap_unchecked();
+            self.buffer_pointer = 0;
+        }
+    }
+
+    pub fn maybe_flush(&mut self, block_size: usize) {
+        if self.buffer_pointer + block_size > BUF_SIZE {
+            self.flush();
+        }
+    }
+
+    pub fn add_byte(&mut self, byte: u8) {
+        unsafe {
+            self.buffer
+                .as_mut_ptr()
+                .add(self.buffer_pointer)
+                .write(byte);
+            self.buffer_pointer += 1;
+        }
+    }
+
+    pub fn add_bytes(&mut self, buf: &[u8]) {
+        unsafe {
+            let len = buf.len();
+            let ptr = self
+                .buffer
+                .get_unchecked_mut(self.buffer_pointer..)
+                .as_mut_ptr();
+            ptr.copy_from_nonoverlapping(buf.as_ptr(), len);
+            self.buffer_pointer += len;
         }
     }
 }
+
+impl<'a, W: std::io::Write> Drop for CustomBufWriter<'a, W> {
+    fn drop(&mut self) {
+        self.flush();
+    }
+}
+
+pub trait PosInt {
+    fn to_posint(buf: &[u8]) -> Self;
+}
+
+macro_rules! impl_int {
+    (for $($t:ty),+) => {
+        $(impl PosInt for $t {
+            #[allow(clippy::cast_lossless, clippy::cast_possible_wrap)]
+            fn to_posint(buf: &[u8]) -> Self {
+                unsafe {
+                    buf.iter()
+                        .map(|byte| (byte & 15) as $t)
+                        .reduce(|acc, digit| acc * 10 + digit)
+                        .unwrap_unchecked()
+                }
+            }
+        })*
+    }
+}
+impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 // problem //
 
@@ -61,28 +106,32 @@ impl UnsafeScanner<'_> {
 /// <li>1 ≤ t ≤ 10<sup>5</sup></li>
 /// <li>0 ≤ a,b ≤ 10<sup>9</sup></li>
 /// </ul>
-fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let tests = scan.token::<u32>();
+fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
+    let mut iter = scan.split(|n| *n <= b' ');
+    let mut writer = CustomBufWriter::new(out);
+
+    let tests = unsafe { u32::to_posint(iter.next().unwrap_unchecked()) };
 
     for _ in 0..tests {
-        let a = scan.token::<u64>();
-        let b = scan.token::<u64>();
+        let a = unsafe { u64::to_posint(iter.next().unwrap_unchecked()) };
+        let b = unsafe { u64::to_posint(iter.next().unwrap_unchecked()) };
 
-        out.write_all(if a << 1 < b || b << 1 < a || (a + b) % 3 != 0 {
+        writer.maybe_flush(4);
+        writer.add_bytes(if a << 1 < b || b << 1 < a || (a + b) % 3 != 0 {
             b"NO\n"
         } else {
             b"YES\n"
-        })
-        .unwrap();
+        });
     }
 }
 
 // entrypoints //
 
 fn main() {
-    let scan = UnsafeScanner::new(std::io::stdin());
-    let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
-    solve(scan, &mut out);
+    let mut buf_str = vec![];
+    std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
+    let mut out = std::io::stdout().lock();
+    solve(&buf_str, &mut out);
 }
 
 #[cfg(test)]
@@ -90,9 +139,8 @@ mod test {
     use super::*;
 
     fn test(input: &[u8], target: &[u8]) {
-        let scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
-        solve(scan, &mut out);
+        solve(input, &mut out);
 
         assert_eq!(out, target);
     }
