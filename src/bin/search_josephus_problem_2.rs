@@ -1146,54 +1146,6 @@ where
     }
 }
 
-pub struct Cursor<'a, T>
-where
-    T: Ord + Clone,
-{
-    set: &'a IndexSet<T>,
-    idx: usize,
-}
-
-impl<'a, T: Ord + Clone> Cursor<'a, T> {
-    pub fn move_next(&mut self) {
-        if self.idx == self.set.len() {
-            self.idx = 0;
-        } else {
-            self.idx += 1;
-        }
-    }
-    pub fn move_index(&mut self, index: usize) {
-        self.idx = index;
-    }
-    pub fn move_prev(&mut self) {
-        if self.idx == 0 {
-            self.idx = self.set.len();
-        } else {
-            self.idx -= 1;
-        }
-    }
-    pub fn item(&self) -> Option<&'a T> {
-        return self.set.get_index(self.idx);
-    }
-    pub fn peek_next(&self) -> Option<&'a T> {
-        if self.idx == self.set.len() {
-            return self.set.first();
-        }
-
-        return self.set.get_index(self.idx + 1);
-    }
-    pub fn peek_index(&self, index: usize) -> Option<&'a T> {
-        return self.set.get_index(index);
-    }
-    pub fn peek_prev(&self) -> Option<&'a T> {
-        if self.idx == 0 {
-            return None;
-        }
-
-        return self.set.get_index(self.idx - 1);
-    }
-}
-
 // I/O boilerplate //
 
 use std::io::Read;

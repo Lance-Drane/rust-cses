@@ -21,6 +21,6 @@ workspace = true
 
 [workspace.lints.clippy]
 # add pedantic ruleset by default, configure per rule
-pedantic = "warn"
+pedantic = { level = "warn", priority = -1 }
 # allow this one because (..=n) range syntax usually gets compiled into worse assembly
 range_plus_one = "allow"

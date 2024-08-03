@@ -636,9 +636,7 @@ pub mod itoap {
     ///
     /// Behaviour is undefined if any of the following conditions are violated:
     ///
-    /// - `buf` must point to sufficient
-    /// [valid](https://doc.rust-lang.org/core/ptr/index.html#safety) bytes of memory to
-    /// write `value`
+    /// - `buf` must point to sufficient [valid](https://doc.rust-lang.org/core/ptr/index.html#safety) bytes of memory to write `value`
     /// - `buf` must be aligned with `core::mem::align_of::<u8>()` bytes
     #[inline]
     pub unsafe fn write_to_ptr<V: Integer>(buf: *mut u8, value: V) -> usize {
