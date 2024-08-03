@@ -1,43 +1,27 @@
 // I/O boilerplate //
 
-pub struct UnsafeScanner<'a> {
-    // not actually dead code, needed for buf_iter to work
-    #[allow(dead_code)]
-    buf_str: Vec<u8>,
-    buf_iter: std::str::SplitAsciiWhitespace<'a>,
+use std::io::Read;
+
+pub trait PosInt {
+    fn to_posint(buf: &[u8]) -> Self;
 }
 
-impl UnsafeScanner<'_> {
-    pub fn new<R: std::io::Read>(mut reader: R) -> Self {
-        let mut buf_str = vec![];
-        unsafe {
-            reader.read_to_end(&mut buf_str).unwrap_unchecked();
-        }
-        let buf_iter = unsafe {
-            let slice = std::str::from_utf8_unchecked(&buf_str);
-            std::mem::transmute::<
-                std::str::SplitAsciiWhitespace<'_>,
-                std::str::SplitAsciiWhitespace<'_>,
-            >(slice.split_ascii_whitespace())
-        };
-
-        Self { buf_str, buf_iter }
-    }
-
-    /// Use "turbofish" syntax `token::<T>()` to select data type of next token.
-    ///
-    /// # Panics
-    /// Panics if there's no more tokens or if the token cannot be parsed as T.
-    pub fn token<T: std::str::FromStr>(&mut self) -> T {
-        unsafe {
-            self.buf_iter
-                .next()
-                .unwrap_unchecked()
-                .parse()
-                .unwrap_unchecked()
-        }
+macro_rules! impl_int {
+    (for $($t:ty),+) => {
+        $(impl PosInt for $t {
+            #[allow(clippy::cast_lossless, clippy::cast_possible_wrap)]
+            fn to_posint(buf: &[u8]) -> Self {
+                unsafe {
+                    buf.iter()
+                        .map(|byte| (byte & 15) as $t)
+                        .reduce(|acc, digit| acc * 10 + digit)
+                        .unwrap_unchecked()
+                }
+            }
+        })*
     }
 }
+impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 // problem //
 
@@ -62,17 +46,19 @@ use std::collections::VecDeque;
 /// <ul>
 /// <li>1 ≤ n,m ≤ 1000</li>
 /// </ul>
-fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
-    let height: usize = scan.token();
-    let width: usize = scan.token();
+fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
+    let mut iter = scan.split(|n| *n <= b' ');
+
+    let height = unsafe { usize::to_posint(iter.next().unwrap_unchecked()) };
+    let width = unsafe { usize::to_posint(iter.next().unwrap_unchecked()) };
 
     // boundaries for 1D array
     let upper_height_bound = height * width - width;
     let upper_width_bound = width - 1;
 
     let mut grid = [0; 1_000_000];
-    for (idx, row) in (0..height).map(|idx| (idx, scan.token::<String>().into_bytes())) {
-        grid[(width * idx)..(width * (idx + 1))].copy_from_slice(&row);
+    for (idx, row) in (0..height).map(|idx| (idx, unsafe { iter.next().unwrap_unchecked() })) {
+        grid[(width * idx)..(width * (idx + 1))].copy_from_slice(row);
     }
 
     let start = unsafe { grid.iter().position(|&x| x == b'A').unwrap_unchecked() };
@@ -176,9 +162,10 @@ fn solve<W: std::io::Write>(mut scan: UnsafeScanner, out: &mut W) {
 // entrypoints //
 
 fn main() {
-    let scan = UnsafeScanner::new(std::io::stdin());
+    let mut buf_str = vec![];
+    std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
     let mut out = std::io::BufWriter::with_capacity(32_768, std::io::stdout().lock());
-    solve(scan, &mut out);
+    solve(&buf_str, &mut out);
 }
 
 #[cfg(test)]
@@ -186,9 +173,8 @@ mod test {
     use super::*;
 
     fn test(input: &[u8], target: &[u8]) {
-        let scan = UnsafeScanner::new(input);
         let mut out = Vec::with_capacity(target.len());
-        solve(scan, &mut out);
+        solve(input, &mut out);
 
         assert_eq!(out, target);
     }

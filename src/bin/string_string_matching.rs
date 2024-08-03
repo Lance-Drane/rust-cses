@@ -20,10 +20,9 @@ use std::io::Read;
 /// <li>1 ≤ n,m ≤ 10<sup>6</sup></li>
 /// </ul>
 fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
-    let mut iter = scan.split(|n| *n <= b' ');
-
-    let string = unsafe { iter.next().unwrap_unchecked() };
-    let pattern = unsafe { iter.next().unwrap_unchecked() };
+    let pos = scan.iter().position(|byte| *byte <= b' ').unwrap();
+    let string = &scan[..pos];
+    let pattern = &scan[pos + 1..scan.len() - 1];
 
     // set up longest prefix suffix array for kmp
     let mut len = 0;

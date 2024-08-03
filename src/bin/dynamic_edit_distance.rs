@@ -33,9 +33,9 @@ use std::io::Read;
 /// </ul>
 #[allow(clippy::too_many_lines)]
 fn solve<W: std::io::Write>(input: &[u8], out: &mut W) {
-    let mut iter = input.split(|byte| *byte <= b' ');
-    let one = iter.next().unwrap();
-    let two = iter.next().unwrap();
+    let pos = input.iter().position(|byte| *byte <= b' ').unwrap();
+    let one = &input[..pos];
+    let two = &input[pos + 1..input.len() - 1];
 
     // to make this even faster, make it a static mut global
     // (this leads to problems with tests, though)

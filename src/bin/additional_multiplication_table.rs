@@ -65,7 +65,7 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
         let mut subsum = n;
         let mut number_smaller = 0;
 
-        for row in 1..=n {
+        for row in 1..(n + 1) {
             while subsum >= mid {
                 number_smaller_in_row -= 1;
                 subsum -= row;

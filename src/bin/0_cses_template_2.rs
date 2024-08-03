@@ -717,12 +717,15 @@ pub mod itoap {
 /// Size of the output buffer. Larger capacities don't seem to help, note that this is OS dependent.
 const BUF_SIZE: usize = 32_768;
 
-/// Custom buffer around a writer
+/// Custom buffer around a writer, more optimistic implementation of `std::io::BufWriter` .
+///
 /// Rationale:
 ///   - 1: Skip the Rust formatter easily
 ///   - 2: Only write to the writer when we explicitly want to (or when we drop the object)
 ///   - 3: Easy API in front of itoap and other dedicated formatters.
 ///   - 4: More straightforwards unchecked API.
+///
+/// If not writing inside of a loop, it may be better to just use the writeln! macro once and skip making this object.
 pub struct CustomBufWriter<'a, W: std::io::Write> {
     writer: &'a mut W,
     buffer: [u8; BUF_SIZE],
@@ -805,6 +808,9 @@ impl<'a, W: std::io::Write> Drop for CustomBufWriter<'a, W> {
 // note that you should never pass an empty buffer slice to these functions
 
 pub trait PosInt {
+    /// quickly create an integer from a buffer, without checking any ASCII codes at all
+    /// works in cases where you're guaranteed to get a positive integer
+    /// (though you can use it with signed integers as well)
     fn to_posint(buf: &[u8]) -> Self;
 }
 
@@ -826,9 +832,11 @@ macro_rules! impl_posint {
 impl_posint!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 pub trait AnyInt {
+    /// quickly create an integer from a buffer, only checking the first character's ASCII code (for the minus sign).
+    /// Use this if the constraints allow for both positive and negative values
     fn to_anyint(buf: &[u8]) -> Self;
 }
-macro_rules! impl_sint {
+macro_rules! impl_anyint {
     (for $($t:ty),+) => {
         $(impl AnyInt for $t {
             #[allow(clippy::cast_lossless, clippy::cast_possible_wrap)]
@@ -854,10 +862,13 @@ macro_rules! impl_sint {
         })*
     }
 }
-impl_sint!(for i8, i16, i32, i64, i128, isize);
+impl_anyint!(for i8, i16, i32, i64, i128, isize);
 
 /// NOTE: This does NOT accept scientific notation or "inf/NaN"
 pub trait AnyFloat {
+    /// quickly create a floating point value from a buffer.
+    /// we explicitly look for a possible negative sign and the floating point value
+    /// otherwise we optimistically use the ASCII value as part of the floating point value
     fn to_float(buf: &[u8]) -> Self;
 }
 macro_rules! impl_float {
@@ -935,8 +946,12 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     // get all "tokens" through using this spliterator
     // you can pass this around functions if you add it to a Box
     // type is Box<dyn Iterator<Item = &'a [u8]> + 'a>
+    //
+    // in cases where you only read in one value, you don't need an iterator, just use a slice to extract out the last value.
     let mut iter = scan.split(|n| *n <= b' ');
     let mut writer = CustomBufWriter::new(out);
+
+    // actual domain problem logic begins here
 
     let a = unsafe { i32::to_anyint(iter.next().unwrap_unchecked()) };
     let b = unsafe { i32::to_anyint(iter.next().unwrap_unchecked()) };

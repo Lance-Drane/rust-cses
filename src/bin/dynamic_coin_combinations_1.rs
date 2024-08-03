@@ -70,7 +70,7 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     let mut cache = vec![0_u64; target + 1];
     cache[0] = 1;
 
-    for idx in *coins.last().unwrap()..=target {
+    for idx in *coins.last().unwrap()..(target + 1) {
         cache[idx] = coins
             .iter()
             .skip_while(|coin| **coin > idx)
