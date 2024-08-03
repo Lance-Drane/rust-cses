@@ -51,3 +51,5 @@ Note that these tests are NOT representative of the actual test cases on CSES - 
 
 - [EbTech](https://github.com/EbTech/rust-algorithms/commit/6198cf16f667859ca60babb4b2264b9b9d039ade) : scanner boilerplate, well-designed algorithm implementations
 - [The Rust Performance Book](https://nnethercote.github.io/perf-book/introduction.html) - some great tips on how to improve performance
+- [itoap](https://github.com/Kogia-sima/itoap) and authors - single-file version of this crate used in several files which require outputting integers
+- [indexset](https://github.com/brurucy/indexset) and authors - good implementation of an ordered set with indexes, serves as a Rust replacement for the [GCC policy-based tree](https://gcc.gnu.org/onlinedocs/libstdc++/manual/policy_data_structures_design.html#pbds.design.container.tree). Single-file version of this crate (and its [ftree dependency](https://github.com/brurucy/ftree)) used in some problems.
