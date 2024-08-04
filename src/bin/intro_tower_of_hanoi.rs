@@ -690,12 +690,12 @@ fn recurse<W: std::io::Write>(
     disc: u8,
 ) {
     if disc == 1 {
-        writer.maybe_flush(6);
+        writer.maybe_flush(4);
         writer.add_bytes(&[from, b' ', to, b'\n']);
         return;
     }
     recurse(writer, from, swap, to, disc - 1);
-    writer.maybe_flush(6);
+    writer.maybe_flush(4);
     writer.add_bytes(&[from, b' ', to, b'\n']);
     recurse(writer, swap, to, from, disc - 1);
 }

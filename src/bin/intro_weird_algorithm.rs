@@ -556,7 +556,7 @@ pub mod itoap {
     }
 }
 
-const BUF_SIZE: usize = 32_768;
+const BUF_SIZE: usize = 3_911;
 
 pub struct CustomBufWriter<'a, W: std::io::Write> {
     writer: &'a mut W,
@@ -675,9 +675,9 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     let mut writer = CustomBufWriter::new(out);
 
     while token != 1 {
+        // total output size is very small, no need to attempt early flush
         writer.add_int(token);
         writer.add_byte(b' ');
-        writer.maybe_flush(21);
         token = if token & 1 == 0 {
             token >> 1
         } else {

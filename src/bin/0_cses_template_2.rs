@@ -712,7 +712,7 @@ pub mod itoap {
     }
 }
 
-/// Size of the output buffer. Larger capacities don't seem to help, note that this is OS dependent.
+/// Size of the output buffer. Larger capacities don't seem to help unless you avoid bounds-checking entirely, note that this is OS dependent.
 const BUF_SIZE: usize = 32_768;
 
 /// Custom buffer around a writer, more optimistic implementation of `std::io::BufWriter` .
@@ -721,7 +721,7 @@ const BUF_SIZE: usize = 32_768;
 ///   - 1: Skip the Rust formatter easily
 ///   - 2: Only write to the writer when we explicitly want to (or when we drop the object)
 ///   - 3: Easy API in front of itoap and other dedicated formatters.
-///   - 4: More straightforwards unchecked API.
+///   - 4: Minimize (in some cases eliminate) bounds-checking, more straightforwards unchecked API.
 ///
 /// If not writing inside of a loop, it may be better to just use the writeln! macro once and skip making this object.
 pub struct CustomBufWriter<'a, W: std::io::Write> {
@@ -792,6 +792,21 @@ impl<'a, W: std::io::Write> CustomBufWriter<'a, W> {
                 .as_mut_ptr();
             ptr.copy_from_nonoverlapping(buf.as_ptr(), len);
             self.buffer_pointer += len;
+        }
+    }
+
+    /// write a very large string which may be larger than the buffer, potentially bypassing the buffer entirely
+    /// this function handles bounds checking and flushing
+    pub fn add_bytes_mass(&mut self, buf: &[u8]) {
+        unsafe {
+            if self.buffer_pointer + buf.len() > BUF_SIZE {
+                // need to flush, must also skip buffer
+                self.flush();
+                self.writer.write_all(buf).unwrap_unchecked();
+            } else {
+                // write directly to buffer, don't flush yet
+                self.add_bytes(buf);
+            }
         }
     }
 }
