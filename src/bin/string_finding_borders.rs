@@ -610,7 +610,7 @@ impl<'a, W: std::io::Write> CustomBufWriter<'a, W> {
     }
 }
 
-impl<'a, W: std::io::Write> Drop for CustomBufWriter<'a, W> {
+impl<W: std::io::Write> Drop for CustomBufWriter<'_, W> {
     fn drop(&mut self) {
         self.flush();
     }

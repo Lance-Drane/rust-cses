@@ -57,7 +57,7 @@ impl<'a, W: std::io::Write> CustomBufWriter<'a, W> {
     }
 }
 
-impl<'a, W: std::io::Write> Drop for CustomBufWriter<'a, W> {
+impl<W: std::io::Write> Drop for CustomBufWriter<'_, W> {
     fn drop(&mut self) {
         self.flush();
     }
@@ -153,7 +153,7 @@ pub struct AdjListIterator<'a> {
     next_e: Option<usize>,
 }
 
-impl<'a> Iterator for AdjListIterator<'a> {
+impl Iterator for AdjListIterator<'_> {
     type Item = (usize, usize);
 
     /// Produces an outgoing edge and vertex.

@@ -538,11 +538,11 @@ impl<T: Clone + Ord> IndexSet<T> {
     }
 
     pub fn iter(&self) -> Iter<T> {
-        return Iter::new(self);
+        Iter::new(self)
     }
 
-    pub fn union<'a>(&'a self, other: &'a Self) -> Union<T> {
-        return Union {
+    pub fn union<'a>(&'a self, other: &'a Self) -> Union<'a, T> {
+        Union {
             merge_iter: MergeIter {
                 start: true,
                 left_iter: self.iter(),
@@ -550,11 +550,11 @@ impl<T: Clone + Ord> IndexSet<T> {
                 right_iter: other.iter(),
                 current_right: None,
             },
-        };
+        }
     }
 
-    pub fn difference<'a>(&'a self, other: &'a Self) -> Difference<T> {
-        return Difference {
+    pub fn difference<'a>(&'a self, other: &'a Self) -> Difference<'a, T> {
+        Difference {
             merge_iter: MergeIter {
                 start: true,
                 left_iter: self.iter(),
@@ -562,11 +562,11 @@ impl<T: Clone + Ord> IndexSet<T> {
                 right_iter: other.iter(),
                 current_right: None,
             },
-        };
+        }
     }
 
-    pub fn symmetric_difference<'a>(&'a self, other: &'a Self) -> SymmetricDifference<T> {
-        return SymmetricDifference {
+    pub fn symmetric_difference<'a>(&'a self, other: &'a Self) -> SymmetricDifference<'a, T> {
+        SymmetricDifference {
             merge_iter: MergeIter {
                 start: true,
                 left_iter: self.iter(),
@@ -574,11 +574,11 @@ impl<T: Clone + Ord> IndexSet<T> {
                 right_iter: other.iter(),
                 current_right: None,
             },
-        };
+        }
     }
 
-    pub fn intersection<'a>(&'a self, other: &'a Self) -> Intersection<T> {
-        return Intersection {
+    pub fn intersection<'a>(&'a self, other: &'a Self) -> Intersection<'a, T> {
+        Intersection {
             merge_iter: MergeIter {
                 start: true,
                 left_iter: self.iter(),
@@ -586,7 +586,7 @@ impl<T: Clone + Ord> IndexSet<T> {
                 right_iter: other.iter(),
                 current_right: None,
             },
-        };
+        }
     }
 
     pub fn retain<F, Q>(&mut self, mut f: F)
@@ -785,7 +785,7 @@ where
     T: Clone + Ord,
 {
     pub fn new(btree: &'a IndexSet<T>) -> Self {
-        return Self {
+        Self {
             btree,
             current_front_node_idx: 0,
             current_front_idx: 0,
@@ -793,7 +793,7 @@ where
             current_back_idx: btree.len(),
             current_front_iterator: Some(btree.inner[0].inner.iter()),
             current_back_iterator: Some(btree.inner[btree.inner.len() - 1].inner.iter()),
-        };
+        }
     }
 }
 
@@ -807,7 +807,7 @@ where
         if self.current_front_idx == self.current_back_idx {
             return None;
         }
-        return if let Some(value) = self
+        if let Some(value) = self
             .current_front_iterator
             .as_mut()
             .and_then(std::iter::Iterator::next)
@@ -823,11 +823,11 @@ where
                 Some(self.btree.inner[self.current_front_node_idx].inner.iter());
 
             self.next()
-        };
+        }
     }
 }
 
-impl<'a, T> DoubleEndedIterator for Iter<'a, T>
+impl<T> DoubleEndedIterator for Iter<'_, T>
 where
     T: Clone + Ord,
 {
@@ -835,7 +835,7 @@ where
         if self.current_front_idx == self.current_back_idx {
             return None;
         }
-        return if let Some(value) = self
+        if let Some(value) = self
             .current_back_iterator
             .as_mut()
             .and_then(std::iter::DoubleEndedIterator::next_back)
@@ -851,11 +851,11 @@ where
                 Some(self.btree.inner[self.current_back_node_idx].inner.iter());
 
             self.next_back()
-        };
+        }
     }
 }
 
-impl<'a, T> FusedIterator for Iter<'a, T> where T: Clone + Ord {}
+impl<T> FusedIterator for Iter<'_, T> where T: Clone + Ord {}
 
 impl<'a, T> IntoIterator for &'a IndexSet<T>
 where
@@ -994,7 +994,7 @@ where
     }
 }
 
-impl<'a, T> FusedIterator for Union<'a, T> where T: Clone + Ord {}
+impl<T> FusedIterator for Union<'_, T> where T: Clone + Ord {}
 
 pub struct Difference<'a, T>
 where
@@ -1030,7 +1030,7 @@ where
     }
 }
 
-impl<'a, T> FusedIterator for Difference<'a, T> where T: Clone + Ord {}
+impl<T> FusedIterator for Difference<'_, T> where T: Clone + Ord {}
 
 pub struct SymmetricDifference<'a, T>
 where
@@ -1071,7 +1071,7 @@ where
     }
 }
 
-impl<'a, T> FusedIterator for SymmetricDifference<'a, T> where T: Clone + Ord {}
+impl<T> FusedIterator for SymmetricDifference<'_, T> where T: Clone + Ord {}
 
 pub struct Intersection<'a, T>
 where
@@ -1104,7 +1104,7 @@ where
     }
 }
 
-impl<'a, T> FusedIterator for Intersection<'a, T> where T: Clone + Ord {}
+impl<T> FusedIterator for Intersection<'_, T> where T: Clone + Ord {}
 
 pub struct Range<'a, T>
 where
@@ -1124,7 +1124,7 @@ where
     }
 }
 
-impl<'a, T> DoubleEndedIterator for Range<'a, T>
+impl<T> DoubleEndedIterator for Range<'_, T>
 where
     T: Clone + Ord,
 {
@@ -1133,7 +1133,7 @@ where
     }
 }
 
-impl<'a, T> FusedIterator for Range<'a, T> where T: Clone + Ord {}
+impl<T> FusedIterator for Range<'_, T> where T: Clone + Ord {}
 
 impl<T> Index<usize> for IndexSet<T>
 where
@@ -1770,7 +1770,7 @@ impl<'a, W: std::io::Write> CustomBufWriter<'a, W> {
     }
 }
 
-impl<'a, W: std::io::Write> Drop for CustomBufWriter<'a, W> {
+impl<W: std::io::Write> Drop for CustomBufWriter<'_, W> {
     fn drop(&mut self) {
         self.flush();
     }
