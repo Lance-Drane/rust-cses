@@ -3,6 +3,7 @@ name = "rust-cses"
 version = "0.1.0"
 edition = "2021"
 publish = false
+rust-version = "1.75.0"
 
 description = "Solutions for the CSES (Code Submission Evaluation System) problem set"
 repository = "https://github.com/Lance-Drane/rust-cses"

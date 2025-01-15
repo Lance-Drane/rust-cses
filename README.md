@@ -4,7 +4,7 @@ My solutions for the competitive programming problem set from https://cses.fi/, 
 
 ## environment
 
-The CSES environment is defined [here](https://cses.fi/howto/). At time of writing, it uses rustc 1.66.1, the 2018 edition of Rust and uses the `rand` crate. Note that I will potentially use later configurations than all of these; however, the files are verified to be accepted.
+The CSES environment is defined [here](https://cses.fi/howto/). At time of writing, it uses rustc 1.75.0, the 2021 edition of Rust and uses the `rand` crate. Note that I will potentially use later configurations than all of these; however, the files are verified to be accepted.
 
 `cargo install` should get you started.
 
