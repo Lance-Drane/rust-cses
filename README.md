@@ -37,7 +37,7 @@ To save yourself from having to write the same I/O code for every single problem
 
 ## linting
 
-`cargo clippy -- -Wclippy::pedantic` should catch all of the important lints.
+`./clippy.sh -Dwarnings` should catch all of the important lints.
 
 ## testing
 
