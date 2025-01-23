@@ -557,13 +557,13 @@ pub mod itoap {
     }
 }
 
-static mut OUT_BUF: [u8; 20] = [0; 20];
 #[allow(static_mut_refs)]
 pub fn write_one_integer(val: impl itoap::Integer, writer: &mut impl std::io::Write) {
+    let mut out_buf = [0; 20];
     unsafe {
-        let l = val.write_to(OUT_BUF.as_mut_ptr());
+        let l = val.write_to(out_buf.as_mut_ptr());
         writer
-            .write_all(OUT_BUF.get_unchecked(..l))
+            .write_all(out_buf.get_unchecked(..l))
             .unwrap_unchecked();
     }
 }
