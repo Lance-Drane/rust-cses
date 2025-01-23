@@ -665,23 +665,15 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
 }
 
 fn sum_possible(arr: &[u64], k: u32, target: u64) -> bool {
-    let mut subarray_count = 0;
+    let mut subarray_count = 1;
     let mut curr_sum = 0;
 
     for num in arr {
-        if *num > target {
-            return false;
-        }
-
         curr_sum += *num;
         if curr_sum > target {
             subarray_count += 1;
             curr_sum = *num;
         }
-    }
-
-    if curr_sum > 0 {
-        subarray_count += 1;
     }
 
     subarray_count <= k
