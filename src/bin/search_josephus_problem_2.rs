@@ -267,7 +267,7 @@ impl<T: Clone + Ord> IndexSet<T> {
         let mut node_idx = self.inner.partition_point(|node| {
             if let Some(max) = node.max.as_ref() {
                 return max.borrow() < value;
-            };
+            }
 
             false
         });
@@ -845,7 +845,7 @@ where
         } else {
             if self.current_back_node_idx == 0 {
                 return None;
-            };
+            }
             self.current_back_node_idx -= 1;
             self.current_back_iterator =
                 Some(self.btree.inner[self.current_back_node_idx].inner.iter());

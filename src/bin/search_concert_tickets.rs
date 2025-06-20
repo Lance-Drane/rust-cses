@@ -707,7 +707,7 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
             None => {
                 writer.add_bytes(b"-1\n");
             }
-        };
+        }
     }
 }
 

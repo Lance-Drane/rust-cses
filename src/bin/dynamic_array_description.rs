@@ -1,5 +1,6 @@
 // I/O boilerplate //
 
+use std::fs::File;
 use std::io::Read;
 
 /// https://github.com/Kogia-sima/itoap
@@ -556,7 +557,7 @@ pub mod itoap {
     }
 }
 
-const BUF_SIZE: usize = 32_768;
+const BUF_SIZE: usize = 11;
 
 pub struct CustomBufWriter<'a, W: std::io::Write> {
     writer: &'a mut W,
@@ -649,89 +650,114 @@ macro_rules! impl_int {
 }
 impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
+#[cfg(unix)]
+fn stdin_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(0) }
+}
+
+#[cfg(unix)]
+fn stdout_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(1) }
+}
+
+#[cfg(windows)]
+fn stdin_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdin().as_raw_handle()) }
+}
+
+#[cfg(windows)]
+fn stdout_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdout().as_raw_handle()) }
+}
+
 // problem //
 
-/// Your task is to divide the numbers 1,2,…,n into two sets of equal sum.
+const MOD: u32 = 1_000_000_007;
+
+/// You know that an array has <i>n</i> integers between 1 and <i>m</i>, and the absolute difference between two adjacent values is at most 1.
+///
+/// Given a description of the array where some values may be unknown, your task is to count the number of arrays that match the description.
 ///
 /// <b>Input</b>
 ///
-/// The only input line contains an integer n.
+/// The first input line has two integers <i>n</i> and <i>m</i>: the array size and the upper bound for each value.
+///
+/// The next line has <i>n</i> integers x<sub>1</sub>,x<sub>2</sub>,...,x<sub>n</sub>: the contents of the array. Value 0 denotes an unknown value.
 ///
 /// <b>Output</b>
 ///
-/// Print "YES", if the division is possible, and "NO" otherwise.
-///
-/// After this, if the division is possible, print an example of how to create the sets. First, print the number of elements in the first set followed by the elements themselves in a separate line, and then, print the second set in a similar way.
+/// Print one integer: the number of arrays modulo 10<sup>9</sup>+7.
 ///
 /// <b>Constraints</b>
 ///
 /// <ul>
-/// <li>1 ≤ n ≤ 10<sup>6</sup></li>
+/// <li>1 ≤ n ≤ 10<sup>5</sup></li>
+/// <li>1 ≤ m ≤ 100</li>
+/// <li>0 ≤ x<sub>i</sub> ≤ m</li>
 /// </ul>
 fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
-    let token = u32::to_posint(&scan[..scan.len() - 1]);
-    let mut writer = CustomBufWriter::new(out);
+    let mut iter = scan.split(|n| *n <= b' ');
 
-    match token & 3 {
-        3 => {
-            writer.add_bytes(b"YES\n");
-            writer.add_int((token + 1) >> 1);
-            writer.add_bytes(b"\n1 2 ");
-            for i in (4..(token + 1)).step_by(4) {
-                writer.maybe_flush(18);
-                writer.add_int(i);
-                writer.add_byte(b' ');
-                writer.add_int(i + 3);
-                writer.add_byte(b' ');
+    let n = unsafe { usize::to_posint(iter.next().unwrap_unchecked()) };
+    let upper_bound = unsafe { usize::to_posint(iter.next().unwrap_unchecked()) };
+
+    // pad beginning and end with zeroes to avoid index computations and edge case control flows
+    let mut dp = vec![0_u32; upper_bound + 2];
+
+    {
+        let first_val = unsafe { iter.next().unwrap_unchecked() };
+        if first_val == b"0" {
+            let sublen = dp.len() - 1;
+            dp[1..sublen].fill(1);
+        } else {
+            unsafe {
+                *dp.get_unchecked_mut(usize::to_posint(first_val)) = 1;
             }
-            writer.maybe_flush(10);
-            writer.add_byte(b'\n');
-            writer.add_int(token >> 1);
-            writer.add_bytes(b"\n3 ");
-            for i in (4..(token + 1)).step_by(4) {
-                writer.maybe_flush(18);
-                writer.add_int(i + 1);
-                writer.add_byte(b' ');
-                writer.add_int(i + 2);
-                writer.add_byte(b' ');
-            }
-        }
-        0 => {
-            let size = token / 2;
-            writer.add_bytes(b"YES\n");
-            writer.add_int(size);
-            writer.add_byte(b'\n');
-            for i in (1..(token + 1)).step_by(4) {
-                writer.maybe_flush(18);
-                writer.add_int(i);
-                writer.add_byte(b' ');
-                writer.add_int(i + 3);
-                writer.add_byte(b' ');
-            }
-            writer.maybe_flush(8);
-            writer.add_byte(b'\n');
-            writer.add_int(size);
-            writer.add_byte(b'\n');
-            for i in (1..(token + 1)).step_by(4) {
-                writer.maybe_flush(18);
-                writer.add_int(i + 1);
-                writer.add_byte(b' ');
-                writer.add_int(i + 2);
-                writer.add_byte(b' ');
-            }
-        }
-        _ => {
-            writer.add_bytes(b"NO\n");
         }
     }
+
+    let mut compute_dp = dp.clone();
+
+    for (base_val, _) in iter.zip(1..n) {
+        if base_val == b"0" {
+            for (new, old) in compute_dp.iter_mut().skip(1).zip(dp.windows(3)) {
+                *new = old.iter().sum::<u32>() % MOD;
+            }
+            std::mem::swap(&mut compute_dp, &mut dp);
+        } else {
+            let num = usize::to_posint(base_val);
+            let next_val = dp.iter().skip(num - 1).take(3).sum::<u32>() % MOD;
+            dp.fill(0);
+            unsafe {
+                *dp.get_unchecked_mut(num) = next_val;
+            }
+        }
+    }
+
+    let mut writer = CustomBufWriter::new(out);
+    writer.add_int(dp.iter().fold(0, |acc, curr| {
+        let mut sum = acc + curr;
+        if sum > MOD {
+            sum -= MOD;
+        }
+        sum
+    }));
 }
 
 // entrypoints //
 
 fn main() {
     let mut buf_str = vec![];
-    std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
-    let mut out = std::io::stdout().lock();
+    stdin_raw().read_to_end(&mut buf_str).unwrap();
+    let mut out = stdout_raw();
     solve(&buf_str, &mut out);
 }
 
@@ -746,91 +772,50 @@ mod test {
         assert_eq!(out, target);
     }
 
-    // NOTE: valid tests can technically print out _any_ solution, but we have a specific implementation.
-
     #[test]
     fn test_example() {
         let input = b"\
-7
+3 5
+2 0 2
 ";
         let target = b"\
-YES
-4
-1 2 4 7 
-3
-3 5 6 ";
+3";
 
         test(input, target);
     }
 
     #[test]
-    fn test_longer() {
+    fn test_no_zeroes() {
         let input = b"\
-11
+3 5
+2 3 2
 ";
         let target = b"\
-YES
-6
-1 2 4 7 8 11 
-5
-3 5 6 9 10 ";
+1";
 
         test(input, target);
     }
 
     #[test]
-    fn test_mod_3() {
+    fn test_ends_and_bounds() {
         let input = b"\
-3
+4 5
+0 4 5 0
 ";
         let target = b"\
-YES
-2
-1 2 
-1
-3 ";
+6";
 
         test(input, target);
     }
 
     #[test]
-    fn test_mod_0() {
+    fn test_low_bound() {
         let input = b"\
-4
+6 1
+0 0 0 0 0 0
 ";
         let target = b"\
-YES
-2
-1 4 
-2
-2 3 ";
-
-        test(input, target);
-    }
-
-    #[test]
-    fn test_mod_0_longer() {
-        let input = b"\
-12
-";
-        let target = b"\
-YES
-6
-1 4 5 8 9 12 
-6
-2 3 6 7 10 11 ";
-
-        test(input, target);
-    }
-
-    #[test]
-    fn test_example_2() {
-        let input = b"\
-6
-";
-        let target = b"\
-NO
-";
+1";
 
         test(input, target);
     }
