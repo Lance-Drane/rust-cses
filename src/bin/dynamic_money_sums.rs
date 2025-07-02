@@ -680,7 +680,9 @@ fn stdout_raw() -> File {
 
 // problem //
 
-const MAX_SUM: usize = 100_001;
+use std::cell::Cell;
+
+const MAX_SUM: usize = 100_000 / 64 + 1;
 
 /// You have n coins with certain values. Your task is to find all money sums you can create using these coins.
 ///
@@ -700,50 +702,78 @@ const MAX_SUM: usize = 100_001;
 /// <li>1 ≤ n ≤ 100</li>
 /// <li>1 ≤ x<sub>i</sub> ≤ 1000</li>
 /// </ul>
-#[allow(static_mut_refs)]
 fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     let mut iter = scan.split(|n| *n <= b' ');
 
-    // you can make these two arrays global static values (create from a const fn), but this causes issues with tests
-    let mut sums = [false; MAX_SUM];
-    sums[0] = true;
-    let mut sums_last_state = sums;
-
-    let mut counts = 0;
-    let mut upper_bound = 0; // used to minimize number of iterations
+    let mut sum_bitset = [0_u64; MAX_SUM];
+    sum_bitset[0] = 1;
+    let bitset_parts = Cell::as_slice_of_cells(Cell::from_mut(&mut sum_bitset));
 
     let n = unsafe { u8::to_posint(iter.next().unwrap_unchecked()) };
 
     for coin in (0..n).map(|_| unsafe { usize::to_posint(iter.next().unwrap_unchecked()) }) {
-        for (prev, (idx, next)) in sums_last_state
-            .iter()
-            .take(upper_bound + 1)
-            .zip(sums.iter_mut().enumerate().skip(coin))
-        {
-            if *prev && !*next {
-                counts += 1;
-                *next = true;
-                upper_bound = upper_bound.max(idx);
+        // equivalent to "bitset | (bitset << coin)" with C++ std::bitset
+        let arr_idx = coin >> 6;
+        let bit_idx = coin & 63;
+
+        if bit_idx == 0 {
+            for (l, r) in bitset_parts
+                .iter()
+                .take(MAX_SUM - arr_idx)
+                .rev()
+                .zip(bitset_parts.iter().rev())
+            {
+                let ptr = r.as_ptr();
+                unsafe { *ptr |= l.get() };
+            }
+        } else {
+            for (r, (l, m)) in bitset_parts.iter().rev().zip(
+                bitset_parts
+                    .iter()
+                    .take(MAX_SUM - arr_idx - 1)
+                    .rev()
+                    .zip(bitset_parts.iter().take(MAX_SUM - arr_idx).rev()),
+            ) {
+                let ptr = r.as_ptr();
+                let mid = m.get() << bit_idx;
+                let left = l.get() >> (64 - bit_idx);
+                unsafe { *ptr |= mid | left };
+            }
+
+            unsafe {
+                *bitset_parts.get_unchecked(arr_idx).as_ptr() |=
+                    bitset_parts.get_unchecked(0).get() << bit_idx;
             }
         }
-        sums_last_state = sums;
+    }
+
+    // set the "first bit of the bitset" back to 0 to exclude "0" from the sum results
+    unsafe {
+        let ptr = bitset_parts.get_unchecked(0).as_ptr();
+        *ptr ^= 1;
     }
 
     let mut writer = CustomBufWriter::new(out);
-    writer.add_int(counts);
+    writer.add_int(
+        bitset_parts
+            .iter()
+            .map(|c| c.get().count_ones())
+            .sum::<u32>(),
+    );
     writer.add_byte(b'\n');
 
-    for sum in sums
-        .iter()
-        .enumerate()
-        .skip(1)
-        .take(upper_bound)
-        .filter(|(_, sum)| **sum)
-        .map(|(idx, _)| idx)
-    {
-        writer.maybe_flush(7);
-        writer.add_int(sum);
-        writer.add_byte(b' ');
+    for (arr_idx, cell) in bitset_parts.iter().enumerate() {
+        let mut integer = cell.get();
+        let mut bit_idx = arr_idx << 6;
+        while integer != 0 {
+            if integer & 1 == 1 {
+                writer.maybe_flush(7);
+                writer.add_int(bit_idx);
+                writer.add_byte(b' ');
+            }
+            integer >>= 1;
+            bit_idx += 1;
+        }
     }
 }
 
@@ -776,6 +806,58 @@ mod test {
         let target = b"\
 9
 2 4 5 6 7 8 9 11 13 ";
+
+        test(input, target);
+    }
+
+    #[test]
+    fn test_example_1() {
+        let input = b"\
+10
+1 1 1 1 1 1 1 1 1 1
+";
+        let target = b"\
+10
+1 2 3 4 5 6 7 8 9 10 ";
+
+        test(input, target);
+    }
+
+    #[test]
+    fn test_example_2() {
+        let input = b"\
+10
+4 1 2 4 2 1 1 5 2 3
+";
+        let target = b"\
+25
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 ";
+
+        test(input, target);
+    }
+
+    #[test]
+    fn test_example_3() {
+        let input = b"\
+10
+2 9 3 6 2 3 1 7 2 7
+";
+        let target = b"\
+42
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 ";
+
+        test(input, target);
+    }
+
+    #[test]
+    fn test_example_4() {
+        let input = b"\
+10
+87 98 17 57 14 98 66 33 79 79
+";
+        let target = b"\
+344
+14 17 31 33 47 50 57 64 66 71 74 79 80 83 87 88 90 93 96 97 98 99 101 104 107 110 112 113 115 116 118 120 121 123 126 129 130 131 134 136 137 140 143 144 145 148 150 151 153 154 155 156 158 159 161 162 164 166 167 169 170 172 173 175 176 177 178 180 181 183 184 185 186 187 188 189 191 192 194 195 196 197 199 200 202 203 205 208 209 210 211 213 214 215 216 217 218 219 221 222 223 224 227 228 229 230 232 233 234 235 237 238 240 241 242 243 245 246 248 249 251 252 253 254 255 256 257 259 260 262 263 264 265 266 267 268 270 271 273 274 275 276 278 279 281 282 283 284 285 286 287 288 289 290 292 293 295 296 297 298 300 301 302 303 306 307 308 309 311 312 313 314 315 316 317 319 320 321 322 325 326 327 328 330 331 332 333 335 336 338 339 340 341 342 343 344 345 346 347 349 350 352 353 354 355 357 358 360 361 362 363 364 365 366 368 369 371 372 373 374 375 376 377 379 380 382 383 385 386 387 388 390 391 393 394 395 396 398 399 400 401 404 405 406 407 409 410 411 412 413 414 415 417 418 419 420 423 425 426 428 429 431 432 433 434 436 437 439 440 441 442 443 444 445 447 448 450 451 452 453 455 456 458 459 461 462 464 466 467 469 470 472 473 474 475 477 478 480 483 484 485 488 491 492 494 497 498 499 502 505 507 508 510 512 513 515 516 518 521 524 527 529 530 531 532 535 538 540 541 545 548 549 554 557 562 564 571 578 581 595 597 611 614 628 ";
 
         test(input, target);
     }
