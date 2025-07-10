@@ -1,6 +1,35 @@
 // I/O boilerplate //
 
+use std::fs::File;
 use std::io::Read;
+
+#[cfg(unix)]
+fn stdin_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(0) }
+}
+
+#[cfg(unix)]
+fn stdout_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(1) }
+}
+
+#[cfg(windows)]
+fn stdin_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdin().as_raw_handle()) }
+}
+
+#[cfg(windows)]
+fn stdout_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdout().as_raw_handle()) }
+}
 
 // problem //
 
@@ -63,8 +92,8 @@ fn solve<W: std::io::Write>(scan: &mut [u8], out: &mut W) {
 
 fn main() {
     let mut buf_str = vec![];
-    std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
-    let mut out = std::io::stdout().lock();
+    stdin_raw().read_to_end(&mut buf_str).unwrap();
+    let mut out = stdout_raw();
     solve(&mut buf_str, &mut out);
 }
 

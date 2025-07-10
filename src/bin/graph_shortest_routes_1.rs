@@ -720,8 +720,13 @@ impl Graph {
             to,
             next_edge_idx: *head_ptr,
         };
-        *head_ptr = Some(self.edges.len());
-        self.edges.push(next_edge);
+        let edges_len = self.edges.len();
+        *head_ptr = Some(edges_len);
+
+        unsafe {
+            self.edges.as_mut_ptr().add(edges_len).write(next_edge);
+            self.edges.set_len(edges_len + 1);
+        }
     }
 
     /// Gets vertex u's adjacency list.
@@ -814,7 +819,8 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     }
 
     let mut writer = CustomBufWriter::new(out);
-    for cost in graph.dijkstra(1).into_iter().skip(1) {
+    writer.add_bytes(b"0 ");
+    for cost in graph.dijkstra(1).into_iter().skip(2) {
         writer.maybe_flush(21);
         writer.add_int(cost);
         writer.add_byte(b' ');

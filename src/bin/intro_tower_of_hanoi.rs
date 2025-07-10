@@ -1,5 +1,6 @@
 // I/O boilerplate //
 
+use std::fs::File;
 use std::io::Read;
 
 /// https://github.com/Kogia-sima/itoap
@@ -556,7 +557,7 @@ pub mod itoap {
     }
 }
 
-const BUF_SIZE: usize = 32_768;
+const BUF_SIZE: usize = 65_536;
 
 pub struct CustomBufWriter<'a, W: std::io::Write> {
     writer: &'a mut W,
@@ -649,6 +650,34 @@ macro_rules! impl_int {
 }
 impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
+#[cfg(unix)]
+fn stdin_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(0) }
+}
+
+#[cfg(unix)]
+fn stdout_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(1) }
+}
+
+#[cfg(windows)]
+fn stdin_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdin().as_raw_handle()) }
+}
+
+#[cfg(windows)]
+fn stdout_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdout().as_raw_handle()) }
+}
+
 // problem //
 
 /// The Tower of Hanoi game consists of three stacks (left, middle and right) and n round disks of different sizes. Initially, the left stack has all the disks, in increasing order of size from top to bottom.
@@ -704,8 +733,8 @@ fn recurse<W: std::io::Write>(
 
 fn main() {
     let mut buf_str = vec![];
-    std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
-    let mut out = std::io::stdout().lock();
+    stdin_raw().read_to_end(&mut buf_str).unwrap();
+    let mut out = stdout_raw();
     solve(&buf_str, &mut out);
 }
 
