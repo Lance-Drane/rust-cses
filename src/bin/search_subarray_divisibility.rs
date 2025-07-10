@@ -87,10 +87,11 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     for num in (0..n).map(|_| unsafe { i64::to_anyint(iter.next().unwrap_unchecked()) }) {
         sum += num;
         #[allow(clippy::cast_possible_truncation)] // ok given constraints
-        let next_mod: usize = sum.rem_euclid(n) as usize;
+        let next_mod_idx: usize = sum.rem_euclid(n) as usize;
         unsafe {
-            counter += mods.get_unchecked(next_mod);
-            *mods.get_unchecked_mut(next_mod) += 1;
+            let next_mod = mods.get_unchecked_mut(next_mod_idx);
+            counter += *next_mod;
+            *next_mod += 1;
         }
     }
 

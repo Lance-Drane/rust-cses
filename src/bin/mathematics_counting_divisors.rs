@@ -707,8 +707,9 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
     let mut iter = scan.split(|n| *n <= b' ');
     let mut writer = CustomBufWriter::new(out);
 
-    let mut divisor_counts = vec![0_u16; UPPER_BOUND];
-    for i in 1..UPPER_BOUND_SQRT {
+    let mut divisor_counts = vec![2_u8; UPPER_BOUND];
+    divisor_counts[1] = 1;
+    for i in 2..UPPER_BOUND_SQRT {
         let start = i * i;
         unsafe {
             *divisor_counts.get_unchecked_mut(start) += 1;
