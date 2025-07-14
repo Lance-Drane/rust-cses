@@ -1,5 +1,6 @@
 // I/O boilerplate //
 
+use std::fs::File;
 use std::io::Read;
 
 /// https://github.com/Kogia-sima/itoap
@@ -649,6 +650,34 @@ macro_rules! impl_int {
 }
 impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
+#[cfg(unix)]
+fn stdin_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(0) }
+}
+
+#[cfg(unix)]
+fn stdout_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(1) }
+}
+
+#[cfg(windows)]
+fn stdin_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdin().as_raw_handle()) }
+}
+
+#[cfg(windows)]
+fn stdout_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdout().as_raw_handle()) }
+}
+
 // problem //
 
 /// Consider a game where there are n children (numbered 1,2,...,n) in a circle. During the game, every other child is removed from the circle until there are no children left. In which order will the children be removed?
@@ -697,8 +726,8 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
 
 fn main() {
     let mut buf_str = vec![];
-    std::io::stdin().lock().read_to_end(&mut buf_str).unwrap();
-    let mut out = std::io::stdout().lock();
+    stdin_raw().read_to_end(&mut buf_str).unwrap();
+    let mut out = stdout_raw();
     solve(&buf_str, &mut out);
 }
 

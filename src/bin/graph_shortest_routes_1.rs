@@ -689,26 +689,26 @@ pub struct EdgeData {
     cost: CostType,
     // label of next node
     to: usize,
-    // index of the previously added edge, or None if this was the first edge added
-    next_edge_idx: Option<usize>,
+    // index of the previously added edge, or usize::MAX if this was the first edge added. Edges are analyzed in reverse order of how they were added.
+    next_edge_idx: usize,
 }
 
 pub struct Graph {
-    // the head points to the index of the last added edge in "self.edges", or None if not connected. the index references the node label
-    heads: Vec<Option<usize>>,
+    // the head points to the index of the last added edge in "self.edges", or usize::MAX if not connected. the index references the node label
+    heads: Vec<usize>,
     // the index references the order in which the edge was added
     edges: Vec<EdgeData>,
 }
 
 impl Graph {
-    /// Initializes a graph with vmax vertices and no edges. To reduce
-    /// unnecessary allocations, `emax_hint` should be close to the number of
-    /// edges that will be inserted.
+    /// Initializes a graph with `num_nodes` vertices and no edges. To reduce
+    /// unnecessary allocations, `num_edges` should be close to the number of
+    /// edges that will be inserted. Note that `usize::MAX` is meant to be a placeholder value signifying that there are no additional edges.
     #[must_use]
-    pub fn new(heads: usize, emax_hint: usize) -> Self {
+    pub fn new(num_nodes: usize, num_edges: usize) -> Self {
         Self {
-            heads: vec![None; heads],
-            edges: Vec::with_capacity(emax_hint),
+            heads: vec![usize::MAX; num_nodes],
+            edges: Vec::with_capacity(num_edges),
         }
     }
 
@@ -721,7 +721,7 @@ impl Graph {
             next_edge_idx: *head_ptr,
         };
         let edges_len = self.edges.len();
-        *head_ptr = Some(edges_len);
+        *head_ptr = edges_len;
 
         unsafe {
             self.edges.as_mut_ptr().add(edges_len).write(next_edge);
@@ -729,7 +729,7 @@ impl Graph {
         }
     }
 
-    /// Gets vertex u's adjacency list.
+    /// Gets vertex `node_idx`'s adjacency list.
     #[must_use]
     pub fn adj_list(&self, node_idx: usize) -> AdjListIterator {
         AdjListIterator {
@@ -748,12 +748,12 @@ impl Graph {
 
         while let Some((Reverse(acc_cost), node)) = min_heap.pop() {
             if costs[node] == acc_cost {
-                for (_edge, vertice, cost) in self.adj_list(node) {
+                for (_edge, vertex, cost) in self.adj_list(node) {
                     let next_cost = cost + acc_cost;
-                    let cost_ptr = unsafe { costs.get_unchecked_mut(vertice) };
+                    let cost_ptr = unsafe { costs.get_unchecked_mut(vertex) };
                     if *cost_ptr > next_cost {
                         *cost_ptr = next_cost;
-                        min_heap.push((Reverse(next_cost), vertice));
+                        min_heap.push((Reverse(next_cost), vertex));
                     }
                 }
             }
@@ -765,8 +765,8 @@ impl Graph {
 
 /// An iterator for convenient adjacency list traversal.
 pub struct AdjListIterator<'a> {
-    edges: &'a Vec<EdgeData>,
-    next_edge_idx: Option<usize>,
+    edges: &'a [EdgeData],
+    next_edge_idx: usize,
 }
 
 impl Iterator for AdjListIterator<'_> {
@@ -774,11 +774,14 @@ impl Iterator for AdjListIterator<'_> {
 
     /// Produces an outgoing edge, the next vertex, and the last cost.
     fn next(&mut self) -> Option<Self::Item> {
-        self.next_edge_idx.map(|idx| {
-            let next_edge = &self.edges[idx];
-            self.next_edge_idx = next_edge.next_edge_idx;
-            (idx, next_edge.to, next_edge.cost)
-        })
+        match self.next_edge_idx {
+            usize::MAX => None,
+            idx => {
+                let next_edge = &self.edges[idx];
+                self.next_edge_idx = next_edge.next_edge_idx;
+                Some((idx, next_edge.to, next_edge.cost))
+            }
+        }
     }
 }
 

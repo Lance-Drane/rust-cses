@@ -86,83 +86,84 @@ impl_int!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 // problem //
 
-/// credit: `EbTech`
-/// A compact graph representation. Edges are numbered in order of insertion.
-/// Each adjacency list consists of all edges pointing out from a given vertex.
+pub struct EdgeData {
+    // label of next node
+    to: usize,
+    // index of the previously added edge, or usize::MAX if this was the first edge added. Edges are analyzed in reverse order of how they were added.
+    next_edge_idx: usize,
+}
+
 pub struct Graph {
-    /// Maps a vertex id to the first edge in its adjacency list.
-    first: Vec<Option<usize>>,
-    /// Maps an edge id to the next edge in the same adjacency list.
-    next: Vec<Option<usize>>,
-    /// Maps an edge id to the vertex that it points to.
-    endp: Vec<usize>,
+    // the head points to the index of the last added edge in "self.edges", or usize::MAX if not connected. the index references the node label
+    heads: Vec<usize>,
+    // the index references the order in which the edge was added
+    edges: Vec<EdgeData>,
 }
 
 impl Graph {
-    /// Initializes a graph with vmax vertices and no edges. To reduce
-    /// unnecessary allocations, `emax_hint` should be close to the number of
-    /// edges that will be inserted.
+    /// Initializes a graph with `num_nodes` vertices and no edges. To reduce
+    /// unnecessary allocations, `num_edges` should be close to the number of
+    /// edges that will be inserted. Note that `usize::MAX` is meant to be a placeholder value signifying that there are no additional edges.
     #[must_use]
-    pub fn new(vmax: usize, emax_hint: usize) -> Self {
+    pub fn new(num_nodes: usize, num_edges: usize) -> Self {
         Self {
-            first: vec![None; vmax],
-            next: Vec::with_capacity(emax_hint),
-            endp: Vec::with_capacity(emax_hint),
+            heads: vec![usize::MAX; num_nodes],
+            edges: Vec::with_capacity(num_edges),
         }
     }
 
-    /// Returns the number of vertices.
-    #[must_use]
-    pub fn num_v(&self) -> usize {
-        self.first.len()
-    }
+    /// Adds a directed edge with a cost factor.
+    pub fn add_edge(&mut self, from: usize, to: usize) {
+        let head_ptr = unsafe { self.heads.get_unchecked_mut(from) };
+        let next_edge = EdgeData {
+            to,
+            next_edge_idx: *head_ptr,
+        };
+        let edges_len = self.edges.len();
+        *head_ptr = edges_len;
 
-    /// Returns the number of edges, double-counting undirected edges.
-    #[must_use]
-    pub fn num_e(&self) -> usize {
-        self.endp.len()
-    }
-
-    /// Adds a directed edge from u to v.
-    pub fn add_edge(&mut self, u: usize, v: usize) {
-        self.next.push(self.first[u]);
-        self.first[u] = Some(self.num_e());
-        self.endp.push(v);
+        unsafe {
+            self.edges.as_mut_ptr().add(edges_len).write(next_edge);
+            self.edges.set_len(edges_len + 1);
+        }
     }
 
     /// An undirected edge is two directed edges. If edges are added only via
-    /// this funcion, the reverse of any edge e can be found at e^1.
+    /// this function, the reverse of any edge e can be found at e^1.
     pub fn add_undirected_edge(&mut self, u: usize, v: usize) {
         self.add_edge(u, v);
         self.add_edge(v, u);
     }
 
-    /// Gets vertex u's adjacency list.
+    /// Gets vertex `node_idx`'s adjacency list.
     #[must_use]
-    pub fn adj_list(&self, u: usize) -> AdjListIterator {
+    pub fn adj_list(&self, node_idx: usize) -> AdjListIterator {
         AdjListIterator {
-            graph: self,
-            next_e: self.first[u],
+            edges: &self.edges,
+            next_edge_idx: self.heads[node_idx],
         }
     }
 }
 
 /// An iterator for convenient adjacency list traversal.
 pub struct AdjListIterator<'a> {
-    graph: &'a Graph,
-    next_e: Option<usize>,
+    edges: &'a [EdgeData],
+    next_edge_idx: usize,
 }
 
 impl Iterator for AdjListIterator<'_> {
     type Item = (usize, usize);
 
-    /// Produces an outgoing edge and vertex.
+    /// Produces an outgoing edge, the next vertex, and the last cost.
     fn next(&mut self) -> Option<Self::Item> {
-        self.next_e.map(|e| {
-            let v = self.graph.endp[e];
-            self.next_e = self.graph.next[e];
-            (e, v)
-        })
+        match self.next_edge_idx {
+            usize::MAX => None,
+            idx => {
+                let next_edge = &self.edges[idx];
+                self.next_edge_idx = next_edge.next_edge_idx;
+                Some((idx, next_edge.to))
+            }
+        }
     }
 }
 

@@ -709,10 +709,6 @@ mod test {
         assert_eq!(out, target);
     }
 
-    // NOTE: while CSES allows for any valid solution, we have a specific implementation.
-    // Characters which come first in the alphabet come in at the beginning and end of the string
-    // Characters at the end of the alphabet come in at the middle of the string
-
     #[test]
     fn test_middle() {
         let input = b"\
