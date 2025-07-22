@@ -1,7 +1,7 @@
 // I/O boilerplate //
 
 use std::fs::File;
-use std::io::Read;
+use std::io::prelude::*;
 
 #[allow(clippy::pedantic)]
 pub mod itoap {
@@ -744,7 +744,7 @@ impl<'a, W: std::io::Write> CustomBufWriter<'a, W> {
     pub fn flush(&mut self) {
         unsafe {
             self.writer
-                .write_all(self.buffer.get_unchecked(..self.buffer_pointer))
+                .write(self.buffer.get_unchecked(..self.buffer_pointer))
                 .unwrap_unchecked();
             self.buffer_pointer = 0;
         }
@@ -987,18 +987,24 @@ fn stdout_raw() -> File {
 /// <ul>
 /// <li>−10<sup>6</sup> ≤ A,B ≤ 10<sup>6</sup></li>
 /// </ul>
-fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
-    // in certain cases (such as when working with string problems), it may be convenient enough
-    // to just make the "scan" input mutable and modify it directly.
+fn solve<R: Read, W: Write>(mut reader: R, out: &mut W) {
+    /// If we know the size of the input in bytes, we can minimize the number of syscalls we make by calling "read" once.
+    /// (In this case, we know that we are reading in two integers (potentially 8 digits each), one space, and one newline.)
+    /// If you don't want to spend time thinking about the size of the input, this can be defined as an _empty_ Vec<u8>, then you can call `reader.read_to_end(&mut vec)` to fill it.
+    /// While this does minimize syscalls, it's possible that the cost of the CPU cache misses matter more.
+    const MAX_INPUT_SIZE: usize = 18;
+    let mut read_buf = vec![0_u8; MAX_INPUT_SIZE]; // You can put this on the stack IF the input size is low enough (usually 8MB)
+                                                   // get all "tokens" through using this spliterator; it's the closest thing to approximate c++'s cin.
+                                                   // NOTE 1: in instances with only one token, just index it directly using `read_size - 1`.
+                                                   // NOTE 2: in instances with two tokens, you can use `read_buf.position()` instead of iterating.
+                                                   // NOTE 3: There is no size hint to this iterator, use the size hints which come from the token. This is important if using vectors and allocating capacity.
+    let mut iter = {
+        let read_size = reader.read(&mut read_buf).unwrap();
+        drop(reader); // okay to drop the input FD here
+        let (scanned, _) = read_buf.split_at(read_size); // NOTE: this does not get rid of the trailing newline
+        scanned.split(|n| *n <= b' ') // tokens are separated by whitespace, and will never be control characters
+    };
 
-    // get all "tokens" through using this spliterator
-    // you can pass this around functions if you add it to a Box
-    // type is Box<dyn Iterator<Item = &'a [u8]> + 'a>
-    //
-    // in cases where you only read in one value, you don't need an iterator, just use a slice to remove the trailing newline.
-    //
-    // if you want to guarantee maximum compatibility with arbitrary platforms, you can also filter for items which are not empty.
-    let mut iter = scan.split(|n| *n <= b' ');
     let mut writer = CustomBufWriter::new(out);
 
     // actual domain problem logic begins here
@@ -1015,11 +1021,8 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
 // entrypoints //
 
 fn main() {
-    // it's fastest to use a vec with no capacity. This relies heavily on the assumption that read_to_end minimizes syscalls, which is what I'm going for.
-    let mut buf_str = vec![];
-    stdin_raw().read_to_end(&mut buf_str).unwrap();
-    let mut out = stdout_raw();
-    solve(&buf_str, &mut out);
+    // main entrypoint only handles obtaining the FDs we read from.
+    solve(stdin_raw(), &mut stdout_raw());
 }
 
 #[cfg(test)]
