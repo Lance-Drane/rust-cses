@@ -1,6 +1,6 @@
 // I/O boilerplate //
 
-use std::fs::File;
+use std::{fs::File, io::prelude::*};
 
 /// https://github.com/Kogia-sima/itoap
 #[allow(clippy::pedantic)]
@@ -576,7 +576,7 @@ impl<'a, W: std::io::Write> CustomBufWriter<'a, W> {
     pub fn flush(&mut self) {
         unsafe {
             self.writer
-                .write_all(self.buffer.get_unchecked(..self.buffer_pointer))
+                .write(self.buffer.get_unchecked(..self.buffer_pointer))
                 .unwrap_unchecked();
             self.buffer_pointer = 0;
         }
@@ -616,11 +616,27 @@ impl<'a, W: std::io::Write> CustomBufWriter<'a, W> {
     }
 }
 
+#[allow(dead_code)]
+#[cfg(unix)]
+fn stdin_raw() -> File {
+    use std::os::fd::FromRawFd;
+
+    unsafe { File::from_raw_fd(0) }
+}
+
 #[cfg(unix)]
 fn stdout_raw() -> File {
     use std::os::fd::FromRawFd;
 
     unsafe { File::from_raw_fd(1) }
+}
+
+#[allow(dead_code)]
+#[cfg(windows)]
+fn stdin_raw() -> File {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+
+    unsafe { File::from_raw_handle(std::io::stdin().as_raw_handle()) }
 }
 
 #[cfg(windows)]
@@ -629,7 +645,6 @@ fn stdout_raw() -> File {
 
     unsafe { File::from_raw_handle(std::io::stdout().as_raw_handle()) }
 }
-
 // problem //
 
 /// There is a hidden integer x. Your task is to find the value of x.
@@ -655,8 +670,9 @@ fn stdout_raw() -> File {
 /// <li>1 ≤ x ≤ 10<sup>9</sup></li>
 /// <li>you can ask at most 30 questions of type "?"</li>
 /// </ul>
-fn solve<R: std::io::BufRead, W: std::io::Write>(read: &mut R, out: &mut W) {
-    let mut buf_str = Vec::with_capacity(4);
+#[cfg(test)]
+fn solve<R: BufRead, W: Write>(read: &mut R, out: &mut W) {
+    let mut in_buf = Vec::with_capacity(4);
     let mut writer = CustomBufWriter::new(out);
 
     let mut l = 1;
@@ -672,16 +688,48 @@ fn solve<R: std::io::BufRead, W: std::io::Write>(read: &mut R, out: &mut W) {
         writer.add_byte(b'\n');
         writer.flush();
 
-        read.read_until(b'\n', &mut buf_str).unwrap();
+        read.read_until(b'\n', &mut in_buf).unwrap();
 
-        if buf_str[0] == b'Y' {
+        if in_buf[0] == b'Y' {
+            // YES
             l = mid + 1;
         } else {
             r = mid - 1;
             ans = mid;
         }
+        in_buf.clear();
+    }
 
-        buf_str.clear();
+    writer.add_bytes(b"! ");
+    writer.add_int(ans);
+    writer.add_byte(b'\n');
+    writer.flush();
+}
+#[cfg(not(test))]
+fn solve<R: Read, W: Write>(read: &mut R, out: &mut W) {
+    let mut in_buf = [0_u8; 4];
+    let mut writer = CustomBufWriter::new(out);
+
+    let mut l = 1;
+    let mut r = 1_000_000_000;
+
+    let mut ans = 0;
+
+    while l <= r {
+        let mid = (l + r) >> 1;
+
+        writer.add_bytes(b"? ");
+        writer.add_int(mid);
+        writer.add_byte(b'\n');
+        writer.flush();
+
+        if read.read(&mut in_buf).unwrap() == 4 {
+            // YES
+            l = mid + 1;
+        } else {
+            r = mid - 1;
+            ans = mid;
+        }
     }
 
     writer.add_bytes(b"! ");
@@ -693,20 +741,22 @@ fn solve<R: std::io::BufRead, W: std::io::Write>(read: &mut R, out: &mut W) {
 // entrypoints //
 
 fn main() {
-    let mut input = std::io::stdin().lock();
-    let mut out = stdout_raw();
-    solve(&mut input, &mut out);
+    #[cfg(test)]
+    let mut stdin = std::io::stdin().lock();
+    #[cfg(not(test))]
+    let mut stdin = stdin_raw();
+    solve(&mut stdin, &mut stdout_raw());
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
 
-    fn test(mut input: &[u8], target: &[u8]) {
+    fn test(mut input: &[u8], target: &str) {
         let mut out = Vec::with_capacity(target.len());
         solve(&mut input, &mut out);
 
-        assert_eq!(out, target);
+        assert_eq!(String::from_utf8(out).unwrap(), target);
     }
 
     #[test]
@@ -743,7 +793,7 @@ YES
 YES
 YES
 ";
-        let target = b"\
+        let target = "\
 ? 500000000
 ? 250000000
 ? 375000000
@@ -813,7 +863,7 @@ NO
 NO
 NO
 ";
-        let target = b"\
+        let target = "\
 ? 500000000
 ? 250000000
 ? 125000000
@@ -883,7 +933,7 @@ YES
 YES
 NO
 ";
-        let target = b"\
+        let target = "\
 ? 500000000
 ? 750000000
 ? 875000000
