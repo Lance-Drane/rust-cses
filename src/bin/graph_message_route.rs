@@ -704,7 +704,7 @@ impl Graph {
 
     /// Gets vertex `node_idx`'s adjacency list.
     #[must_use]
-    pub fn adj_list(&self, node_idx: usize) -> AdjListIterator {
+    pub fn adj_list(&'_ self, node_idx: usize) -> AdjListIterator<'_> {
         AdjListIterator {
             edges: &self.edges,
             next_edge_idx: self.heads[node_idx],

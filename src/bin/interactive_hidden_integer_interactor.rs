@@ -7,9 +7,9 @@ use rand::Rng;
 /// Put all stderr output here
 ///
 /// To use:
-///   - mkfifo fifo
-///   - cargo run --bin interactive_hidden_integer_solution <fifo | cargo run --bin interactive_hidden_integer_interactor >fifo
-/// 
+///   - `mkfifo fifo`
+///   - `cargo run --bin interactive_hidden_integer_solution <fifo | cargo run --bin interactive_hidden_integer_interactor > fifo`
+///
 /// # Errors
 ///   raises `std::io::Error` if incorrect input format or IO somehow fails
 ///

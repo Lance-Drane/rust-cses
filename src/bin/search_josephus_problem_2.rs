@@ -537,7 +537,7 @@ impl<T: Clone + Ord> IndexSet<T> {
         true
     }
 
-    pub fn iter(&self) -> Iter<T> {
+    pub fn iter(&'_ self) -> Iter<'_, T> {
         Iter::new(self)
     }
 
