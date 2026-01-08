@@ -212,6 +212,7 @@ fn solve<W: std::io::Write>(scan: &[u8], out: &mut W) {
 
     for idx in 1..(n_nodes + 1) {
         if teams[idx] == DEFAULT_TEAM {
+            teams[idx] = 1;
             stack.push((1_u8, idx));
             while let Some((team, node)) = stack.pop() {
                 let other_team = team ^ 2;
